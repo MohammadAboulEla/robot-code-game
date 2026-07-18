@@ -70,12 +70,12 @@ export const GameView: React.FC<GameViewProps> = ({
   } = useRobotSimulation(puzzle, commandRegistry, onPuzzleSolved);
 
   return (
-    <main className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+    <main className="flex-grow w-full p-4 min-h-0 overflow-hidden flex flex-col">
       {isPlaygroundMode && playgroundProps ? (
         // 3-Column Layout for Dev Playground Mode (4-4-4 span split)
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch flex-1 min-h-0">
           {/* Column 1: Playground Control & JSON Panel */}
-          <div className="lg:col-span-4 h-full">
+          <div className="lg:col-span-4 flex flex-col min-h-0 h-full overflow-hidden">
             <PlaygroundPanel
               puzzles={playgroundProps.puzzles}
               selectedPuzzle={playgroundProps.selectedPuzzle}
@@ -87,12 +87,14 @@ export const GameView: React.FC<GameViewProps> = ({
           </div>
 
           {/* Column 2: Code Editor, Control Panel, Debugger & Terminal */}
-          <div className="lg:col-span-4 space-y-6">
-            <CodeEditor 
-              code={code} 
-              setCode={setCode} 
-              executingLine={executingLine} 
-            />
+          <div className="lg:col-span-4 flex flex-col gap-4 min-h-0 h-full overflow-hidden">
+            <div className="flex-1 min-h-0 flex flex-col">
+              <CodeEditor 
+                code={code} 
+                setCode={setCode} 
+                executingLine={executingLine} 
+              />
+            </div>
 
             <ControlPanel 
               isPlaying={isPlaying}
@@ -113,27 +115,16 @@ export const GameView: React.FC<GameViewProps> = ({
               />
             )}
 
-            <ConsoleTerminal 
-              consoleLogs={consoleLogs} 
-              clearLogs={clearLogs} 
-            />
+            <div className="h-36 shrink-0 min-h-0">
+              <ConsoleTerminal 
+                consoleLogs={consoleLogs} 
+                clearLogs={clearLogs} 
+              />
+            </div>
           </div>
 
           {/* Column 3: Isometric Visualizer, Manual, and Support Panels */}
-          <div className="lg:col-span-4 space-y-6">
-            <IsometricVisualEngine 
-              worldState={worldState}
-              isSuccess={isSuccess}
-              errorMessage={errorMessage}
-              setErrorMessage={setErrorMessage}
-              resetSimulation={resetSimulation}
-              actionQueue={actionQueue}
-              currentIndex={currentIndex}
-              isDebugMode={isDebugMode}
-            />
-
-            <ObjectiveCard puzzle={puzzle} />
-
+          <div className="lg:col-span-4 flex flex-col gap-4 min-h-0 h-full overflow-hidden">
             <InspectorPanel
               puzzle={puzzle}
               unlockedCommandIds={unlockedCommandIds}
@@ -142,19 +133,29 @@ export const GameView: React.FC<GameViewProps> = ({
               onLoadSolution={loadSolution}
               onDeleteSolution={deleteSolution}
               currentCode={code}
+              worldState={worldState}
+              isSuccess={isSuccess}
+              errorMessage={errorMessage}
+              setErrorMessage={setErrorMessage}
+              resetSimulation={resetSimulation}
+              actionQueue={actionQueue}
+              currentIndex={currentIndex}
+              isDebugMode={isDebugMode}
             />
           </div>
         </div>
       ) : (
         // Standard 2-Column Layout for Players (6-6 span split)
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch flex-1 min-h-0">
           {/* LEFT Column: Code Editor, Terminal & APIs */}
-          <div className="lg:col-span-6 space-y-6">
-            <CodeEditor 
-              code={code} 
-              setCode={setCode} 
-              executingLine={executingLine} 
-            />
+          <div className="lg:col-span-6 flex flex-col gap-4 min-h-0 h-full overflow-hidden">
+            <div className="flex-1 min-h-0 flex flex-col">
+              <CodeEditor 
+                code={code} 
+                setCode={setCode} 
+                executingLine={executingLine} 
+              />
+            </div>
 
             <ControlPanel 
               isPlaying={isPlaying}
@@ -175,27 +176,16 @@ export const GameView: React.FC<GameViewProps> = ({
               />
             )}
 
-            <ConsoleTerminal 
-              consoleLogs={consoleLogs} 
-              clearLogs={clearLogs} 
-            />
+            <div className="h-36 shrink-0 min-h-0">
+              <ConsoleTerminal 
+                consoleLogs={consoleLogs} 
+                clearLogs={clearLogs} 
+              />
+            </div>
           </div>
 
           {/* RIGHT Column: Isometric Simulator & Objective */}
-          <div className="lg:col-span-6 space-y-6">
-            <IsometricVisualEngine 
-              worldState={worldState}
-              isSuccess={isSuccess}
-              errorMessage={errorMessage}
-              setErrorMessage={setErrorMessage}
-              resetSimulation={resetSimulation}
-              actionQueue={actionQueue}
-              currentIndex={currentIndex}
-              isDebugMode={isDebugMode}
-            />
-
-            <ObjectiveCard puzzle={puzzle} />
-
+          <div className="lg:col-span-6 flex flex-col gap-4 min-h-0 h-full overflow-hidden">
             <InspectorPanel
               puzzle={puzzle}
               unlockedCommandIds={unlockedCommandIds}
@@ -204,6 +194,14 @@ export const GameView: React.FC<GameViewProps> = ({
               onLoadSolution={loadSolution}
               onDeleteSolution={deleteSolution}
               currentCode={code}
+              worldState={worldState}
+              isSuccess={isSuccess}
+              errorMessage={errorMessage}
+              setErrorMessage={setErrorMessage}
+              resetSimulation={resetSimulation}
+              actionQueue={actionQueue}
+              currentIndex={currentIndex}
+              isDebugMode={isDebugMode}
             />
           </div>
         </div>

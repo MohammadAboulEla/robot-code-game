@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { Cpu, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Cpu, ArrowLeft, Maximize2, Minimize2, Hammer } from 'lucide-react';
 
 interface HeaderProps {
   onLoadSolutionPreset?: () => void;
@@ -25,56 +25,79 @@ export const Header: React.FC<HeaderProps> = ({
   isPlaygroundActive,
   onTogglePlayground
 }) => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  };
+
   return (
-    <header id="game-header" className="border-b border-[#3e382d] bg-[#f4efe1]/90 backdrop-blur px-6 py-4 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+    <header id="game-header" className="border-b border-[#3e382d] bg-[#f4efe1] px-4 py-1.5 select-none shrink-0 z-50">
+      <div className="flex justify-between items-center w-full">
+        {/* Left HUD: Title & Active Protocol */}
         <div className="flex items-center gap-3">
           {showBackButton && (
             <button
               onClick={onBack}
-              className="p-2 bg-[#faf8f2] hover:bg-[#eae3ce] text-[#5c5341] hover:text-[#9c3526] border border-[#3e382d] transition cursor-pointer mr-1"
-              title="Back to Mission Select"
+              className="p-1 bg-[#faf8f2] hover:bg-[#eae3ce] text-[#5c5341] hover:text-[#9c3526] border border-[#3e382d] cursor-pointer"
+              title="Exit Protocol"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-3.5 h-3.5" />
             </button>
           )}
-          <div className="p-2 bg-[#9c3526]/10 text-[#9c3526] rounded border border-[#9c3526]/30">
-            <Cpu className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-[#2e2a22] flex items-center gap-2 uppercase font-serif">
-              Robot Code Game
-              <span className="inline-flex items-center rounded-none bg-[#9c3526]/10 px-2 py-0.5 text-[10px] font-bold text-[#9c3526] ring-1 ring-inset ring-[#9c3526]/20">
-                SYSTEM V1.0
-              </span>
-              {isPlaygroundActive && (
-                <span className="inline-flex items-center rounded-none bg-amber-600/10 px-2 py-0.5 text-[10px] font-bold text-amber-800 ring-1 ring-inset ring-amber-600/20 animate-pulse">
-                  PLAYGROUND MODE
-                </span>
-              )}
-            </h1>
-            <p className="text-xs text-[#5c5341] font-mono">
+          
+          <div className="flex items-center gap-2">
+            <Cpu className="w-4 h-4 text-[#9c3526]" />
+            <span className="text-xs font-bold font-mono tracking-widest text-[#2e2a22] uppercase">
+              R-CODE.SYS
+            </span>
+            <span className="text-[10px] text-[#5c5341] opacity-60 font-mono">|</span>
+            <span className="text-[10px] font-mono text-[#5c5341]">
               {isPlaygroundActive
-                ? `PLAYTEST PROTOCOL: ${puzzleTitle ? puzzleTitle.toUpperCase() : 'SANDBOX'}`
+                ? `PLAYTEST: ${puzzleTitle ? puzzleTitle.toUpperCase() : 'SANDBOX'}`
                 : puzzleTitle
                 ? `ACTIVE PROTOCOL: ${puzzleTitle.toUpperCase()}`
-                : 'Autonomous Isometric Grid Programming Simulator'}
-            </p>
+                : 'STANDBY_'}
+            </span>
           </div>
         </div>
 
-        {isDev && onTogglePlayground && (
+        {/* Right HUD: Game Controls */}
+        <div className="flex items-center gap-2">
+          {isDev && onTogglePlayground && (
+            <button
+              onClick={onTogglePlayground}
+              title={isPlaygroundActive ? "Exit Playground Mode" : "Enter Playground Mode"}
+              className={`p-1 border border-[#3e382d] cursor-pointer transition ${
+                isPlaygroundActive
+                  ? 'bg-[#9c3526] text-[#faf8f2] hover:bg-[#822c20]'
+                  : 'bg-[#faf8f2] text-[#5c5341] hover:bg-[#eae3ce]'
+              }`}
+            >
+              <Hammer className="w-3.5 h-3.5" />
+            </button>
+          )}
+
           <button
-            onClick={onTogglePlayground}
-            className={`px-3 py-1.5 border border-[#3e382d] font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer flex items-center gap-1.5 ${
-              isPlaygroundActive
-                ? 'bg-[#9c3526] text-[#faf8f2] hover:bg-[#822c20] hover:border-[#3e382d]'
-                : 'bg-[#f4efe1] hover:bg-[#eae3ce] hover:text-[#9c3526] text-[#5c5341]'
-            }`}
+            onClick={toggleFullscreen}
+            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            className="p-1 bg-[#faf8f2] text-[#5c5341] hover:bg-[#eae3ce] border border-[#3e382d] cursor-pointer"
           >
-            {isPlaygroundActive ? 'Exit Playground' : 'Enter Playground'}
+            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
           </button>
-        )}
+        </div>
       </div>
     </header>
   );

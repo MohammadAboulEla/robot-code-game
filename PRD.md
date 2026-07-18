@@ -273,7 +273,7 @@ Manual, Commands API, Compass, and Archive & Metrics are reachable via tabs with
 No visual/color regressions — a screenshot side-by-side with the current UI should read as "same game, tidier layout," not a reskin.
 
 Milestone 9 — Game-Shell Viewport: Fixed Window, HUD Header, No Page Scroll
-Status: ☐ Not started
+Status: ☑ Done
 Why this is needed: the app currently behaves like a webpage — the whole page scrolls vertically, and the top bar reads as website chrome (logo + title + nav-style buttons in a horizontal bar). A desktop game convention is a fixed window: the viewport itself never scrolls, a slim HUD bar sits at the top with iconography instead of nav-link-style buttons, and only specific internal regions (console log, archive list) scroll when their content overflows. This milestone depends on M8 being done — fewer always-visible panels makes it realistic to fit everything in one fixed viewport without cramming.
 Steps:
 

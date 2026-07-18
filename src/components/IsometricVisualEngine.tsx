@@ -57,12 +57,12 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
   const toastMsg = currentAction ? getActionToastMessage(currentAction) : '';
 
   return (
-    <div className={`bg-[#f4efe1] border border-[#3e382d] shadow-sm relative flex flex-col overflow-hidden ${
+    <div className={`bg-[#f4efe1] border border-[#3e382d] shadow-sm relative flex flex-col overflow-hidden flex-1 min-h-0 h-full ${
       (isDebugMode && errorMessage) ? 'animate-shake' : ''
     }`}>
       
       {/* Viewport Header */}
-      <div className="border-b border-[#3e382d] px-4 py-3 bg-[#eae3ce] flex justify-between items-center">
+      <div className="border-b border-[#3e382d] px-4 py-3 bg-[#eae3ce] flex justify-between items-center shrink-0">
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-[#9c3526]" />
           <span className="text-xs font-bold text-[#2e2a22] tracking-wider uppercase font-mono">Isometric Visual Engine</span>
@@ -73,7 +73,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
       </div>
 
       {/* Isometric Render Window */}
-      <div className="relative w-full aspect-[5/3.2] bg-[#faf8f2] flex items-center justify-center p-4">
+      <div className="relative w-full flex-grow flex-1 min-h-0 bg-[#faf8f2] flex items-center justify-center p-4">
         
         <svg 
           viewBox="0 0 500 320" 

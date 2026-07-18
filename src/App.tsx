@@ -101,7 +101,7 @@ export default function App() {
   }, []);
 
   return (
-    <div id="game-container" className="min-h-screen bg-[#dfd3b6] text-[#2e2a22] font-sans antialiased selection:bg-[#9c3526]/20 selection:text-[#2e2a22] pb-12">
+    <div id="game-container" className="h-screen w-screen flex flex-col overflow-hidden bg-[#dfd3b6] text-[#2e2a22] font-sans antialiased selection:bg-[#9c3526]/20 selection:text-[#2e2a22]">
       
       {/* Vintage Header bar */}
       <Header 
@@ -117,32 +117,36 @@ export default function App() {
       <Ticker />
 
       {activePuzzle ? (
-        <GameView
-          key={isPlaygroundMode ? `playground-${activePuzzle.id}-${playgroundReloadCounter}` : activePuzzle.id}
-          puzzle={activePuzzle}
-          commandRegistry={commandRegistry}
-          unlockedCommandIds={isPlaygroundMode ? ALL_COMMAND_IDS : unlockedCommandIds}
-          onPuzzleSolved={handlePuzzleSolved}
-          onBack={handleBackToPuzzles}
-          isPlaygroundMode={isPlaygroundMode}
-          // Playground specific props
-          playgroundProps={
-            isPlaygroundMode && playgroundPuzzle ? {
-              puzzles: PUZZLES,
-              selectedPuzzle: playgroundPuzzle,
-              onSelectPuzzle: handleSelectPlaygroundPuzzle,
-              onHotReload: handleHotReloadPlaygroundPuzzle
-            } : undefined
-          }
-        />
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+          <GameView
+            key={isPlaygroundMode ? `playground-${activePuzzle.id}-${playgroundReloadCounter}` : activePuzzle.id}
+            puzzle={activePuzzle}
+            commandRegistry={commandRegistry}
+            unlockedCommandIds={isPlaygroundMode ? ALL_COMMAND_IDS : unlockedCommandIds}
+            onPuzzleSolved={handlePuzzleSolved}
+            onBack={handleBackToPuzzles}
+            isPlaygroundMode={isPlaygroundMode}
+            // Playground specific props
+            playgroundProps={
+              isPlaygroundMode && playgroundPuzzle ? {
+                puzzles: PUZZLES,
+                selectedPuzzle: playgroundPuzzle,
+                onSelectPuzzle: handleSelectPlaygroundPuzzle,
+                onHotReload: handleHotReloadPlaygroundPuzzle
+              } : undefined
+            }
+          />
+        </div>
       ) : (
-        <PuzzleSelect
-          key={`puzzle-select-${solvedCounter}`}
-          puzzles={PUZZLES}
-          unlockedNodeIds={unlockedNodeIds}
-          unlockedCommandIds={unlockedCommandIds}
-          onSelectPuzzle={setSelectedPuzzle}
-        />
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <PuzzleSelect
+            key={`puzzle-select-${solvedCounter}`}
+            puzzles={PUZZLES}
+            unlockedNodeIds={unlockedNodeIds}
+            unlockedCommandIds={unlockedCommandIds}
+            onSelectPuzzle={setSelectedPuzzle}
+          />
+        </div>
       )}
 
       {/* Retro aesthetic status foot-rail */}

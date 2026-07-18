@@ -47,7 +47,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const codeLines = code.split('\n');
 
   return (
-    <div className="bg-[#faf8f2] border border-[#3e382d] shadow-sm flex flex-col">
+    <div className="bg-[#faf8f2] border border-[#3e382d] shadow-sm flex flex-col flex-1 min-h-0 h-full">
       {/* Header Editor Controls */}
       <div className="border-b border-[#3e382d] bg-[#eae3ce] px-4 py-2.5 flex justify-between items-center">
         <div className="flex items-center gap-2">
@@ -60,7 +60,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       </div>
 
       {/* Synchronized Gutter and Textarea Editor */}
-      <div className="flex bg-[#faf8f2] h-[400px] relative text-xs font-mono">
+      <div className="flex bg-[#faf8f2] flex-1 min-h-0 h-full relative text-xs font-mono">
         
         {/* 1. Gutter Line Numbers */}
         <div 

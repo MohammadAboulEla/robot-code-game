@@ -28,3 +28,30 @@
 .animate-slide-in-right {
   animation: slide-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+html, body, #root {
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  background-color: #dfd3b6;
+}
+
+/* Custom minimal scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #faf8f2;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #eae3ce;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9c3526;
+}
