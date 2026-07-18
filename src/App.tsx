@@ -12,11 +12,16 @@ import { Header } from './components/Header';
 import { Ticker } from './components/Ticker';
 import { PuzzleSelect } from './components/PuzzleSelect';
 import { GameView } from './components/GameView';
+import { DialoguePopup } from './components/DialoguePopup';
+import { useDialogue } from './hooks/useDialogue';
 
 export default function App() {
   const [selectedPuzzle, setSelectedPuzzle] = useState<PuzzleDefinition | null>(null);
   // Force re-render of puzzle select when a puzzle is solved (to update badges/unlocks)
   const [solvedCounter, setSolvedCounter] = useState(0);
+
+  // Dialogue engine
+  const { activeScript, dismissDialogue, fireDialogueTrigger } = useDialogue();
 
   // Playground Mode states
   const [isPlaygroundMode, setIsPlaygroundMode] = useState(false);
@@ -86,7 +91,17 @@ export default function App() {
 
   const handlePuzzleSolved = useCallback(() => {
     setSolvedCounter(c => c + 1);
-  }, []);
+    if (activePuzzle) {
+      fireDialogueTrigger('puzzleSolved', { puzzleId: activePuzzle.id });
+    }
+  }, [activePuzzle, fireDialogueTrigger]);
+
+  // Fire puzzleLoad dialogue trigger when a puzzle is selected
+  useEffect(() => {
+    if (selectedPuzzle && !isPlaygroundMode) {
+      fireDialogueTrigger('puzzleLoad', { puzzleId: selectedPuzzle.id });
+    }
+  }, [selectedPuzzle, isPlaygroundMode, fireDialogueTrigger]);
 
   // Playground puzzle selection and JSON reload helpers
   const handleSelectPlaygroundPuzzle = useCallback((puzzle: PuzzleDefinition) => {
@@ -146,6 +161,11 @@ export default function App() {
             onSelectPuzzle={setSelectedPuzzle}
           />
         </div>
+      )}
+
+      {/* Dialogue popup overlay */}
+      {activeScript && (
+        <DialoguePopup script={activeScript} onComplete={dismissDialogue} />
       )}
 
     </div>
