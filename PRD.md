@@ -222,7 +222,7 @@ slower version of Run.
 
 ---
 
-### Milestone 7 — Content Expansion & Sharing (optional, do once core loop is fun)
+### Milestone 7 — Content Expansion & Sharing (optional, do once core loop is fun) (SKIP FOR NOW)
 **Status:** ☐ Not started
 
 **Steps:**
@@ -254,7 +254,7 @@ M2, M3, and M4 can be built in parallel once M1 is done if you want to paralleli
 sessions, but M0 → M1 must be sequential and complete first.
 
 Milestone 8 — UI/UX Reorganization: Collapse the Scattered Panels
-Status: ☐ Not started
+Status: ☑ Done
 Why this is needed: the current layout stacks Objective, System Manual, Robot Commands API, Orientation Compass, and Protocol Archive & Metrics as always-visible panels competing for the same space. None of this touches game logic — it's purely presentation/IA — so it's safe to do independently of the interpreter/progression work, but it should happen before content scales (M7), since more puzzles + more unlocked commands will only make an unorganized panel stack worse.
 Steps:
 
@@ -271,3 +271,23 @@ Only two panels are permanently visible without user interaction: code editor an
 Objective info is fully reachable but defaults to a one-line collapsed state after the initial view.
 Manual, Commands API, Compass, and Archive & Metrics are reachable via tabs within one Inspector panel, in that order, with zero loss of existing functionality (locked-command greying, solution list/sort/delete/replay actions, compass direction mappings all still work).
 No visual/color regressions — a screenshot side-by-side with the current UI should read as "same game, tidier layout," not a reskin.
+
+Milestone 9 — Game-Shell Viewport: Fixed Window, HUD Header, No Page Scroll
+Status: ☐ Not started
+Why this is needed: the app currently behaves like a webpage — the whole page scrolls vertically, and the top bar reads as website chrome (logo + title + nav-style buttons in a horizontal bar). A desktop game convention is a fixed window: the viewport itself never scrolls, a slim HUD bar sits at the top with iconography instead of nav-link-style buttons, and only specific internal regions (console log, archive list) scroll when their content overflows. This milestone depends on M8 being done — fewer always-visible panels makes it realistic to fit everything in one fixed viewport without cramming.
+Steps:
+
+Lock the page itself: html, body, #root get height: 100% / 100dvh and overflow: hidden. The entire app renders inside one fixed-size shell (flex or CSS grid) that never grows taller than the viewport — no matter how much code, console output, or archive data exists.
+Redesign the top bar as a HUD strip, not a website header: shrink it in height, replace the back-arrow/title/button row layout with a convention closer to a game's title bar — e.g. system icon + protocol name on the left, small icon-only controls (playground, settings, fullscreen) on the right, no breadcrumb-style "back to X" text link. Icons over labels where the action is common (matches game HUD conventions like a pause/menu icon rather than a nav link).
+Any panel whose content can legitimately exceed its box (console output log, archive/solutions list, long code files) gets its own internal scroll container with a fixed height — scrollbar lives inside that panel, never on the page. Style scrollbars minimally (thin, low-contrast) so they read as part of the game UI, not a browser default.
+Make the main layout viewport-relative (%/fr/vh units via CSS grid) instead of content-driven (auto height stacking). Panels resize to fit the window rather than the window growing to fit panels.
+Add a fullscreen toggle (Fullscreen API) in the HUD bar — standard expectation for a "game," even a browser-based one.
+Test at a few common desktop resolutions (1366×768 up to 1920×1080) to confirm nothing requires page-level scrolling at any of them; if content genuinely can't fit at the smallest target resolution, decide per-panel what collapses (tie back to M8's Inspector tabs and objective recall bar) rather than letting the page scroll.
+
+Definition of Done:
+
+html/body never scroll under any window size in the test list; only explicitly designated internal panels (console, archive list) can scroll, and only within their own bounded box.
+The top bar is visually and functionally a HUD (compact, icon-forward, no nav-link styling) rather than a webpage header.
+Resizing the browser window resizes/reflows the game shell like a resizable game window, not a responsive webpage.
+A fullscreen toggle exists and works.
+No change to the color palette or overall vintage-terminal art style — this milestone is shell/viewport mechanics only.

@@ -9,12 +9,10 @@ import { useRobotSimulation } from '../hooks/useRobotSimulation';
 import { CodeEditor } from './CodeEditor';
 import { ControlPanel } from './ControlPanel';
 import { ConsoleTerminal } from './ConsoleTerminal';
-import { SystemManual } from './SystemManual';
-import { OrientationCompass } from './OrientationCompass';
+import { InspectorPanel } from './InspectorPanel';
 import { IsometricVisualEngine } from './IsometricVisualEngine';
 import { ObjectiveCard } from './ObjectiveCard';
 import { PlaygroundPanel } from './PlaygroundPanel';
-import { SolutionsPanel } from './SolutionsPanel';
 import { DebuggerPanel } from './DebuggerPanel';
 import { Award } from 'lucide-react';
 
@@ -136,17 +134,15 @@ export const GameView: React.FC<GameViewProps> = ({
 
             <ObjectiveCard puzzle={puzzle} />
 
-            <SolutionsPanel
+            <InspectorPanel
               puzzle={puzzle}
+              unlockedCommandIds={unlockedCommandIds}
+              facing={worldState.robot.facing}
               savedSolutions={savedSolutions}
               onLoadSolution={loadSolution}
               onDeleteSolution={deleteSolution}
               currentCode={code}
             />
-
-            <SystemManual unlockedCommandIds={unlockedCommandIds} />
-
-            <OrientationCompass facing={worldState.robot.facing} />
           </div>
         </div>
       ) : (
@@ -183,10 +179,6 @@ export const GameView: React.FC<GameViewProps> = ({
               consoleLogs={consoleLogs} 
               clearLogs={clearLogs} 
             />
-
-            <SystemManual unlockedCommandIds={unlockedCommandIds} />
-
-            <OrientationCompass facing={worldState.robot.facing} />
           </div>
 
           {/* RIGHT Column: Isometric Simulator & Objective */}
@@ -204,8 +196,10 @@ export const GameView: React.FC<GameViewProps> = ({
 
             <ObjectiveCard puzzle={puzzle} />
 
-            <SolutionsPanel
+            <InspectorPanel
               puzzle={puzzle}
+              unlockedCommandIds={unlockedCommandIds}
+              facing={worldState.robot.facing}
               savedSolutions={savedSolutions}
               onLoadSolution={loadSolution}
               onDeleteSolution={deleteSolution}

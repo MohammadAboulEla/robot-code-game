@@ -8,10 +8,12 @@ import { Compass } from 'lucide-react';
 
 interface OrientationCompassProps {
   facing: 'up' | 'down' | 'left' | 'right';
+  hideWrapper?: boolean;
 }
 
 export const OrientationCompass: React.FC<OrientationCompassProps> = ({
-  facing
+  facing,
+  hideWrapper = false
 }) => {
   const getAbsoluteDirectionName = (currentFacing: string, relative: string): string => {
     const headings = ['up', 'right', 'down', 'left'];
@@ -31,8 +33,8 @@ export const OrientationCompass: React.FC<OrientationCompassProps> = ({
     return '';
   };
 
-  return (
-    <div className="bg-[#f4efe1] border border-[#3e382d] p-4 shadow-sm">
+  const content = (
+    <>
       <div className="flex items-center gap-3 justify-between">
         <div className="flex items-center gap-2">
           <Compass className="w-4 h-4 text-[#9c3526]" />
@@ -73,6 +75,16 @@ export const OrientationCompass: React.FC<OrientationCompassProps> = ({
           <span className="text-[11px] text-[#5c5341] mt-0.5">→ {getAbsoluteDirectionName(facing, 'left')}</span>
         </div>
       </div>
+    </>
+  );
+
+  if (hideWrapper) {
+    return <div className="space-y-1">{content}</div>;
+  }
+
+  return (
+    <div className="bg-[#f4efe1] border border-[#3e382d] p-4 shadow-sm">
+      {content}
     </div>
   );
 };
