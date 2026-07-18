@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { PuzzleDefinition, CommandDefinition } from '../types/gameTypes';
 import { useRobotSimulation } from '../hooks/useRobotSimulation';
 import { CodeEditor } from './CodeEditor';
@@ -68,6 +68,8 @@ export const GameView: React.FC<GameViewProps> = ({
     loadSolution
   } = useRobotSimulation(puzzle, commandRegistry, onPuzzleSolved);
 
+  const [isTerminalCollapsed, setIsTerminalCollapsed] = useState(true);
+
   return (
     <main className="flex-grow w-full p-4 min-h-0 overflow-hidden flex flex-col">
       {isPlaygroundMode && playgroundProps ? (
@@ -87,7 +89,7 @@ export const GameView: React.FC<GameViewProps> = ({
 
           {/* Column 2: Code Editor, Control Panel, Debugger & Terminal */}
           <div className="lg:col-span-4 flex flex-col gap-4 min-h-0 h-full overflow-hidden">
-            <div className="flex-1 min-h-0 flex flex-col">
+            <div className="flex-[3] min-h-0 flex flex-col">
               <CodeEditor 
                 code={code} 
                 setCode={setCode} 
@@ -107,13 +109,15 @@ export const GameView: React.FC<GameViewProps> = ({
               toggleSound={toggleSound}
             />
 
-            <div className="h-52 shrink-0 min-h-0">
+            <div className={`${isTerminalCollapsed ? 'h-[34px] shrink-0' : 'flex-[2] min-h-0'} transition-all duration-200 flex flex-col`}>
               <ConsoleTerminal 
                 consoleLogs={consoleLogs} 
                 clearLogs={clearLogs} 
                 actionQueue={actionQueue}
                 currentIndex={currentIndex}
                 isDebugMode={isDebugMode}
+                isCollapsed={isTerminalCollapsed}
+                onToggleCollapse={() => setIsTerminalCollapsed(!isTerminalCollapsed)}
               />
             </div>
           </div>
@@ -144,7 +148,7 @@ export const GameView: React.FC<GameViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch flex-1 min-h-0">
           {/* LEFT Column: Code Editor, Terminal & APIs */}
           <div className="lg:col-span-6 flex flex-col gap-4 min-h-0 h-full overflow-hidden">
-            <div className="flex-1 min-h-0 flex flex-col">
+            <div className="flex-[3] min-h-0 flex flex-col">
               <CodeEditor 
                 code={code} 
                 setCode={setCode} 
@@ -164,13 +168,15 @@ export const GameView: React.FC<GameViewProps> = ({
               toggleSound={toggleSound}
             />
 
-            <div className="h-52 shrink-0 min-h-0">
+            <div className={`${isTerminalCollapsed ? 'h-[34px] shrink-0' : 'flex-[2] min-h-0'} transition-all duration-200 flex flex-col`}>
               <ConsoleTerminal 
                 consoleLogs={consoleLogs} 
                 clearLogs={clearLogs} 
                 actionQueue={actionQueue}
                 currentIndex={currentIndex}
                 isDebugMode={isDebugMode}
+                isCollapsed={isTerminalCollapsed}
+                onToggleCollapse={() => setIsTerminalCollapsed(!isTerminalCollapsed)}
               />
             </div>
           </div>

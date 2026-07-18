@@ -12,7 +12,6 @@ import { Header } from './components/Header';
 import { Ticker } from './components/Ticker';
 import { PuzzleSelect } from './components/PuzzleSelect';
 import { GameView } from './components/GameView';
-import { Footer } from './components/Footer';
 
 export default function App() {
   const [selectedPuzzle, setSelectedPuzzle] = useState<PuzzleDefinition | null>(null);
@@ -148,9 +147,6 @@ export default function App() {
           />
         </div>
       )}
-
-      {/* Retro aesthetic status foot-rail */}
-      <Footer />
 
     </div>
   );

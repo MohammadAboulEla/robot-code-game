@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Terminal, Cpu } from 'lucide-react';
+import { Terminal, Cpu, ChevronDown, ChevronUp } from 'lucide-react';
 import { DebuggerPanel } from './DebuggerPanel';
 import type { VMAction } from '../robotInterpreter';
 
@@ -14,6 +14,8 @@ interface ConsoleTerminalProps {
   actionQueue: VMAction[];
   currentIndex: number;
   isDebugMode?: boolean;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
 export const ConsoleTerminal: React.FC<ConsoleTerminalProps> = ({
@@ -21,7 +23,9 @@ export const ConsoleTerminal: React.FC<ConsoleTerminalProps> = ({
   clearLogs,
   actionQueue,
   currentIndex,
-  isDebugMode = false
+  isDebugMode = false,
+  isCollapsed,
+  onToggleCollapse
 }) => {
   const [activeTab, setActiveTab] = useState<'terminal' | 'debugger'>('terminal');
 
@@ -31,9 +35,12 @@ export const ConsoleTerminal: React.FC<ConsoleTerminalProps> = ({
       <div className="border-b border-[#3e382d] bg-[#eae3ce] flex justify-between items-center shrink-0">
         <div className="flex">
           <button
-            onClick={() => setActiveTab('terminal')}
+            onClick={() => {
+              setActiveTab('terminal');
+              if (isCollapsed) onToggleCollapse();
+            }}
             className={`flex items-center gap-1.5 px-4 py-2 text-[10px] font-bold border-r border-[#3e382d] transition uppercase tracking-wider cursor-pointer ${
-              activeTab === 'terminal'
+              activeTab === 'terminal' && !isCollapsed
                 ? 'bg-[#faf8f2] text-[#9c3526]'
                 : 'text-[#5c5341] hover:bg-[#eae3ce]/50 hover:text-[#2e2a22]'
             }`}
@@ -43,9 +50,12 @@ export const ConsoleTerminal: React.FC<ConsoleTerminalProps> = ({
           </button>
           
           <button
-            onClick={() => setActiveTab('debugger')}
+            onClick={() => {
+              setActiveTab('debugger');
+              if (isCollapsed) onToggleCollapse();
+            }}
             className={`flex items-center gap-1.5 px-4 py-2 text-[10px] font-bold border-r border-[#3e382d] transition uppercase tracking-wider cursor-pointer ${
-              activeTab === 'debugger'
+              activeTab === 'debugger' && !isCollapsed
                 ? 'bg-[#faf8f2] text-[#9c3526]'
                 : 'text-[#5c5341] hover:bg-[#eae3ce]/50 hover:text-[#2e2a22]'
             }`}
@@ -55,46 +65,55 @@ export const ConsoleTerminal: React.FC<ConsoleTerminalProps> = ({
           </button>
         </div>
 
-        <div className="px-4 py-1.5">
-          {activeTab === 'terminal' ? (
+        <div className="px-4 py-1.5 flex items-center gap-3">
+          {activeTab === 'terminal' && !isCollapsed && (
             <button 
               onClick={clearLogs}
-              className="text-[10px] text-[#9c3526] hover:text-[#852a1e] uppercase font-bold cursor-pointer"
+              className="text-[10px] text-[#9c3526] hover:text-[#852a1e] uppercase font-bold cursor-pointer mr-1"
             >
               Clear Logs
             </button>
-          ) : (
-            actionQueue.length > 0 && currentIndex !== -1 && (
-              <span className="bg-[#faf8f2] px-2 py-0.5 border border-[#3e382d] text-[#5c5341] font-bold text-[9px]">
-                STEP {currentIndex + 1} OF {actionQueue.length}
-              </span>
-            )
           )}
+          {activeTab === 'debugger' && !isCollapsed && actionQueue.length > 0 && currentIndex !== -1 && (
+            <span className="bg-[#faf8f2] px-2 py-0.5 border border-[#3e382d] text-[#5c5341] font-bold text-[9px] mr-1">
+              STEP {currentIndex + 1} OF {actionQueue.length}
+            </span>
+          )}
+
+          <button
+            onClick={onToggleCollapse}
+            title={isCollapsed ? "Expand Panel" : "Collapse Panel"}
+            className="text-[#5c5341] hover:text-[#9c3526] cursor-pointer flex items-center justify-center p-0.5"
+          >
+            {isCollapsed ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
         </div>
       </div>
 
       {/* Tab Panels */}
-      <div className="flex-grow flex-1 min-h-0 bg-[#faf8f2] flex flex-col overflow-hidden">
-        {activeTab === 'terminal' && (
-          <div className="p-4 flex-grow overflow-y-auto space-y-1.5">
-            {consoleLogs.map((log, index) => (
-              <div key={`log-${index}`} className="border-l-2 border-[#eae3ce] pl-2.5">
-                {log}
-              </div>
-            ))}
-          </div>
-        )}
+      {!isCollapsed && (
+        <div className="flex-grow flex-1 min-h-0 bg-[#faf8f2] flex flex-col overflow-hidden">
+          {activeTab === 'terminal' && (
+            <div className="p-4 flex-grow overflow-y-auto space-y-1.5">
+              {consoleLogs.map((log, index) => (
+                <div key={`log-${index}`} className="border-l-2 border-[#eae3ce] pl-2.5">
+                  {log}
+                </div>
+              ))}
+            </div>
+          )}
 
-        {activeTab === 'debugger' && (
-          <div className="flex-grow flex-1 min-h-0 flex flex-col overflow-hidden">
-            <DebuggerPanel
-              actionQueue={actionQueue}
-              currentIndex={currentIndex}
-              hideHeader={true}
-            />
-          </div>
-        )}
-      </div>
+          {activeTab === 'debugger' && (
+            <div className="flex-grow flex-1 min-h-0 flex flex-col overflow-hidden">
+              <DebuggerPanel
+                actionQueue={actionQueue}
+                currentIndex={currentIndex}
+                hideHeader={true}
+              />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
