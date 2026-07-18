@@ -252,3 +252,22 @@ M0 (registry + puzzle model)
 
 M2, M3, and M4 can be built in parallel once M1 is done if you want to parallelize across
 sessions, but M0 → M1 must be sequential and complete first.
+
+Milestone 8 — UI/UX Reorganization: Collapse the Scattered Panels
+Status: ☐ Not started
+Why this is needed: the current layout stacks Objective, System Manual, Robot Commands API, Orientation Compass, and Protocol Archive & Metrics as always-visible panels competing for the same space. None of this touches game logic — it's purely presentation/IA — so it's safe to do independently of the interpreter/progression work, but it should happen before content scales (M7), since more puzzles + more unlocked commands will only make an unorganized panel stack worse.
+Steps:
+
+Convert the "PROTOCOL OBJECTIVE" card into a collapsible recall bar: auto-expanded once when a puzzle loads (or reloads), then collapses to a single-line summary (puzzle title + target coordinates) with a chevron/tap-to-expand affordance. Preserve the full objective text/grid/start/target details in the expanded state — don't drop content, just default it to collapsed after first view.
+Merge System Manual, Robot Commands API, Orientation Compass, and Protocol Archive & Metrics into a single tabbed "Inspector" panel component. Each becomes one tab's content instead of its own stacked card. Preserve all existing functionality inside each tab exactly as-is (locked/unlocked command greying from M2, solution sorting/archive actions from M4, etc.) — this is a container change, not a content change.
+Order the tabs by real usage frequency, not build order: Manual → Commands API → Compass → Archive & Metrics. Default-select the Manual tab on puzzle load.
+Keep the code editor and isometric visual engine as the only two panels that are always fully visible and never collapse/tab — everything else routes through the recall bar or the Inspector tabs.
+Visually de-emphasize the Inspector panel relative to the editor/isometric pair (smaller type scale and/or muted card background is enough — no new color palette), so the primary gameplay surface reads as primary at a glance.
+Do not change the existing color palette, iconography, or overall vintage-terminal visual style — this milestone is layout/IA only.
+
+Definition of Done:
+
+Only two panels are permanently visible without user interaction: code editor and isometric visual engine.
+Objective info is fully reachable but defaults to a one-line collapsed state after the initial view.
+Manual, Commands API, Compass, and Archive & Metrics are reachable via tabs within one Inspector panel, in that order, with zero loss of existing functionality (locked-command greying, solution list/sort/delete/replay actions, compass direction mappings all still work).
+No visual/color regressions — a screenshot side-by-side with the current UI should read as "same game, tidier layout," not a reskin.
