@@ -144,7 +144,7 @@ unlocks the next node and its command(s) become usable (and documented) in puzzl
 ---
 
 ### Milestone 3 — Dev Playground Mode (hidden, for building/testing puzzles)
-**Status:** ☐ Not started
+**Status:** ☑ Done
 
 **Why now:** you need this before building the visual editor (M5) and before content
 scales — it's your own testing tool, so build it as soon as multi-puzzle + registry exist.

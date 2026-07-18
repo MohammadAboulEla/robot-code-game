@@ -13,6 +13,7 @@ import { SystemManual } from './SystemManual';
 import { OrientationCompass } from './OrientationCompass';
 import { IsometricVisualEngine } from './IsometricVisualEngine';
 import { ObjectiveCard } from './ObjectiveCard';
+import { PlaygroundPanel } from './PlaygroundPanel';
 
 interface GameViewProps {
   puzzle: PuzzleDefinition;
@@ -20,6 +21,13 @@ interface GameViewProps {
   unlockedCommandIds: string[];
   onPuzzleSolved: () => void;
   onBack: () => void;
+  isPlaygroundMode?: boolean;
+  playgroundProps?: {
+    puzzles: PuzzleDefinition[];
+    selectedPuzzle: PuzzleDefinition;
+    onSelectPuzzle: (puzzle: PuzzleDefinition) => void;
+    onHotReload: (newPuzzle: PuzzleDefinition) => void;
+  };
 }
 
 export const GameView: React.FC<GameViewProps> = ({
@@ -27,7 +35,9 @@ export const GameView: React.FC<GameViewProps> = ({
   commandRegistry,
   unlockedCommandIds,
   onPuzzleSolved,
-  onBack
+  onBack,
+  isPlaygroundMode = false,
+  playgroundProps
 }) => {
   const {
     code,
@@ -47,59 +57,113 @@ export const GameView: React.FC<GameViewProps> = ({
     pauseSimulation,
     resetSimulation,
     loadSolutionPreset,
-    loadBlankTemplate
+    loadBlankTemplate,
+    actionQueue
   } = useRobotSimulation(puzzle, commandRegistry, onPuzzleSolved);
 
   return (
     <main className="max-w-7xl mx-auto px-4 md:px-6 py-6">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
-        {/* LEFT Column: Code Editor, Terminal & APIs */}
-        <div className="lg:col-span-6 space-y-6">
-          
-          <CodeEditor 
-            code={code} 
-            setCode={setCode} 
-            executingLine={executingLine} 
-          />
+      {isPlaygroundMode && playgroundProps ? (
+        // 3-Column Layout for Dev Playground Mode (4-4-4 span split)
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Column 1: Playground Control & JSON Panel */}
+          <div className="lg:col-span-4 h-full">
+            <PlaygroundPanel
+              puzzles={playgroundProps.puzzles}
+              selectedPuzzle={playgroundProps.selectedPuzzle}
+              onSelectPuzzle={playgroundProps.onSelectPuzzle}
+              onHotReload={playgroundProps.onHotReload}
+              worldState={worldState}
+              actionQueue={actionQueue}
+            />
+          </div>
 
-          <ControlPanel 
-            isPlaying={isPlaying}
-            playbackSpeed={playbackSpeed}
-            setPlaybackSpeed={setPlaybackSpeed}
-            runSimulation={runSimulation}
-            pauseSimulation={pauseSimulation}
-            stepSimulation={stepSimulation}
-            resetSimulation={resetSimulation}
-          />
+          {/* Column 2: Code Editor, Control Panel & Terminal */}
+          <div className="lg:col-span-4 space-y-6">
+            <CodeEditor 
+              code={code} 
+              setCode={setCode} 
+              executingLine={executingLine} 
+            />
 
-          <ConsoleTerminal 
-            consoleLogs={consoleLogs} 
-            clearLogs={clearLogs} 
-          />
+            <ControlPanel 
+              isPlaying={isPlaying}
+              playbackSpeed={playbackSpeed}
+              setPlaybackSpeed={setPlaybackSpeed}
+              runSimulation={runSimulation}
+              pauseSimulation={pauseSimulation}
+              stepSimulation={stepSimulation}
+              resetSimulation={resetSimulation}
+            />
 
-          <SystemManual unlockedCommandIds={unlockedCommandIds} />
+            <ConsoleTerminal 
+              consoleLogs={consoleLogs} 
+              clearLogs={clearLogs} 
+            />
+          </div>
 
-          <OrientationCompass facing={worldState.robot.facing} />
+          {/* Column 3: Isometric Visualizer, Manual, and Support Panels */}
+          <div className="lg:col-span-4 space-y-6">
+            <IsometricVisualEngine 
+              worldState={worldState}
+              isSuccess={isSuccess}
+              errorMessage={errorMessage}
+              setErrorMessage={setErrorMessage}
+              resetSimulation={resetSimulation}
+            />
 
+            <ObjectiveCard puzzle={puzzle} />
+
+            <SystemManual unlockedCommandIds={unlockedCommandIds} />
+
+            <OrientationCompass facing={worldState.robot.facing} />
+          </div>
         </div>
+      ) : (
+        // Standard 2-Column Layout for Players (6-6 span split)
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* LEFT Column: Code Editor, Terminal & APIs */}
+          <div className="lg:col-span-6 space-y-6">
+            <CodeEditor 
+              code={code} 
+              setCode={setCode} 
+              executingLine={executingLine} 
+            />
 
-        {/* RIGHT Column: Isometric Simulator & Objective */}
-        <div className="lg:col-span-6 space-y-6">
-          
-          <IsometricVisualEngine 
-            worldState={worldState}
-            isSuccess={isSuccess}
-            errorMessage={errorMessage}
-            setErrorMessage={setErrorMessage}
-            resetSimulation={resetSimulation}
-          />
+            <ControlPanel 
+              isPlaying={isPlaying}
+              playbackSpeed={playbackSpeed}
+              setPlaybackSpeed={setPlaybackSpeed}
+              runSimulation={runSimulation}
+              pauseSimulation={pauseSimulation}
+              stepSimulation={stepSimulation}
+              resetSimulation={resetSimulation}
+            />
 
-          <ObjectiveCard puzzle={puzzle} />
+            <ConsoleTerminal 
+              consoleLogs={consoleLogs} 
+              clearLogs={clearLogs} 
+            />
 
+            <SystemManual unlockedCommandIds={unlockedCommandIds} />
+
+            <OrientationCompass facing={worldState.robot.facing} />
+          </div>
+
+          {/* RIGHT Column: Isometric Simulator & Objective */}
+          <div className="lg:col-span-6 space-y-6">
+            <IsometricVisualEngine 
+              worldState={worldState}
+              isSuccess={isSuccess}
+              errorMessage={errorMessage}
+              setErrorMessage={setErrorMessage}
+              resetSimulation={resetSimulation}
+            />
+
+            <ObjectiveCard puzzle={puzzle} />
+          </div>
         </div>
-
-      </div>
+      )}
     </main>
   );
 };

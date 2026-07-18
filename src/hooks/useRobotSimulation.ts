@@ -241,6 +241,7 @@ export function useRobotSimulation(
     resetSimulation,
     loadSolutionPreset,
     loadBlankTemplate,
-    logMessage
+    logMessage,
+    actionQueue
   };
 }
