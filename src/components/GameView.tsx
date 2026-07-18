@@ -14,6 +14,7 @@ import { OrientationCompass } from './OrientationCompass';
 import { IsometricVisualEngine } from './IsometricVisualEngine';
 import { ObjectiveCard } from './ObjectiveCard';
 import { PlaygroundPanel } from './PlaygroundPanel';
+import { SolutionsPanel } from './SolutionsPanel';
 
 interface GameViewProps {
   puzzle: PuzzleDefinition;
@@ -58,7 +59,10 @@ export const GameView: React.FC<GameViewProps> = ({
     resetSimulation,
     loadSolutionPreset,
     loadBlankTemplate,
-    actionQueue
+    actionQueue,
+    savedSolutions,
+    deleteSolution,
+    loadSolution
   } = useRobotSimulation(puzzle, commandRegistry, onPuzzleSolved);
 
   return (
@@ -114,6 +118,14 @@ export const GameView: React.FC<GameViewProps> = ({
 
             <ObjectiveCard puzzle={puzzle} />
 
+            <SolutionsPanel
+              puzzle={puzzle}
+              savedSolutions={savedSolutions}
+              onLoadSolution={loadSolution}
+              onDeleteSolution={deleteSolution}
+              currentCode={code}
+            />
+
             <SystemManual unlockedCommandIds={unlockedCommandIds} />
 
             <OrientationCompass facing={worldState.robot.facing} />
@@ -161,6 +173,14 @@ export const GameView: React.FC<GameViewProps> = ({
             />
 
             <ObjectiveCard puzzle={puzzle} />
+
+            <SolutionsPanel
+              puzzle={puzzle}
+              savedSolutions={savedSolutions}
+              onLoadSolution={loadSolution}
+              onDeleteSolution={deleteSolution}
+              currentCode={code}
+            />
           </div>
         </div>
       )}

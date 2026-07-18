@@ -6,7 +6,8 @@
 import { useState, useEffect, useRef } from 'react';
 import type { PuzzleDefinition, CommandDefinition } from '../types/gameTypes';
 import { parsePython, PythonExecutor, cloneState, GameWorldState, VMAction } from '../robotInterpreter';
-import { markPuzzleSolved } from '../state/saveData';
+import { markPuzzleSolved, savePuzzleSolution, deletePuzzleSolution, getSavedSolutions } from '../state/saveData';
+import type { SavedSolution } from '../types/gameTypes';
 
 /**
  * Derives a GameWorldState from a PuzzleDefinition.
@@ -50,6 +51,11 @@ export function useRobotSimulation(
   // Game outcomes
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
+  const [savedSolutions, setSavedSolutions] = useState<SavedSolution[]>([]);
+
+  useEffect(() => {
+    setSavedSolutions(getSavedSolutions(puzzle.id));
+  }, [puzzle.id]);
 
   const playbackTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -68,7 +74,7 @@ export function useRobotSimulation(
     setConsoleLogs([]);
   };
 
-  const applyStepState = (action: VMAction) => {
+  const applyStepState = (action: VMAction, currentActions: VMAction[] = actionQueue) => {
     // Log step outcomes
     if (action.message) {
       if (action.success) {
@@ -85,6 +91,25 @@ export function useRobotSimulation(
       setIsSuccess(true);
       setIsPlaying(false);
       logMessage(`🏆 Protocol Complete: SUCCESS!`);
+      
+      const linesCount = code.split('\n').filter(line => {
+        const clean = line.split('#')[0].trim();
+        return clean.length > 0;
+      }).length;
+      
+      const physicalActions = currentActions.filter(
+        a => a.type === 'move' || a.type === 'rotate' || a.type === 'grab' || a.type === 'drop'
+      ).length;
+      
+      const metrics = {
+        instructions: currentActions.length,
+        lines: linesCount,
+        steps: physicalActions
+      };
+      
+      savePuzzleSolution(puzzle.id, code, metrics);
+      setSavedSolutions(getSavedSolutions(puzzle.id));
+
       markPuzzleSolved(puzzle.id);
       onPuzzleSolved?.();
     }
@@ -109,7 +134,7 @@ export function useRobotSimulation(
       setCurrentIndex(0);
       setIsPlaying(true);
       setExecutingLine(actions[0].line);
-      applyStepState(actions[0]);
+      applyStepState(actions[0], actions);
       
       logMessage(`Compiled successfully. Initiating sequence with ${actions.length} instructions...`);
     } catch (err: any) {
@@ -133,7 +158,7 @@ export function useRobotSimulation(
         setActionQueue(actions);
         setCurrentIndex(0);
         setExecutingLine(actions[0].line);
-        applyStepState(actions[0]);
+        applyStepState(actions[0], actions);
         logMessage(`Debug step loaded. Line ${actions[0].line}: Executing...`);
         return;
       } catch (err: any) {
@@ -222,6 +247,18 @@ export function useRobotSimulation(
     setConsoleLogs(['Loaded blank sandbox workspace.']);
   };
 
+  const deleteSolution = (timestamp: number) => {
+    deletePuzzleSolution(puzzle.id, timestamp);
+    setSavedSolutions(getSavedSolutions(puzzle.id));
+    logMessage('Deleted archived protocol sequence.');
+  };
+
+  const loadSolution = (solutionCode: string) => {
+    setCode(solutionCode);
+    resetSimulationStateOnly();
+    setConsoleLogs(['Loaded archived protocol sequence from memory database.']);
+  };
+
   return {
     code,
     setCode,
@@ -242,6 +279,9 @@ export function useRobotSimulation(
     loadSolutionPreset,
     loadBlankTemplate,
     logMessage,
-    actionQueue
+    actionQueue,
+    savedSolutions,
+    deleteSolution,
+    loadSolution
   };
 }

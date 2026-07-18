@@ -49,3 +49,17 @@ export interface PuzzleDefinition {
   starterCode: string;
   parMetrics?: { instructions: number; lines: number };
 }
+
+export interface SolutionMetrics {
+  instructions: number;
+  lines: number;
+  steps: number;
+}
+
+export interface SavedSolution {
+  code: string;
+  metrics: SolutionMetrics;
+  timestamp: number;
+  label?: string;
+}
+

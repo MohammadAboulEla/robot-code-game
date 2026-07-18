@@ -4,12 +4,7 @@
  */
 
 import { getCommandIdsFromNodes, getNodesUnlockedByPuzzle } from '../progression/tree';
-
-export interface SavedSolution {
-  code: string;
-  timestamp: number;
-  label?: string;
-}
+import type { SavedSolution, SolutionMetrics } from '../types/gameTypes';
 
 export interface SaveData {
   schemaVersion: number;
@@ -19,7 +14,7 @@ export interface SaveData {
 }
 
 const STORAGE_KEY = 'robot-code-game-save';
-const CURRENT_SCHEMA_VERSION = 1;
+const CURRENT_SCHEMA_VERSION = 2;
 
 function createDefaultSaveData(): SaveData {
   return {
@@ -46,7 +41,34 @@ export function loadSaveData(): SaveData {
     }
 
     // Future: migrate from older schema versions here
-    // if (parsed.schemaVersion < CURRENT_SCHEMA_VERSION) { ... }
+    if (parsed.schemaVersion === 1) {
+      if (parsed.solutions) {
+        for (const puzzleId of Object.keys(parsed.solutions)) {
+          const list = parsed.solutions[puzzleId];
+          if (Array.isArray(list)) {
+            parsed.solutions[puzzleId] = list.map((sol: any) => {
+              if (sol && !sol.metrics) {
+                const lines = sol.code ? sol.code.split('\n').filter((l: string) => {
+                  const clean = l.split('#')[0].trim();
+                  return clean.length > 0;
+                }).length : 0;
+                return {
+                  ...sol,
+                  metrics: {
+                    instructions: 0,
+                    lines,
+                    steps: 0
+                  }
+                };
+              }
+              return sol;
+            });
+          }
+        }
+      }
+      parsed.schemaVersion = 2;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    }
 
     return parsed as SaveData;
   } catch {
@@ -105,3 +127,56 @@ export function getUnlockedNodeIds(): string[] {
   const data = loadSaveData();
   return data.unlockedNodeIds;
 }
+
+export function savePuzzleSolution(
+  puzzleId: string,
+  code: string,
+  metrics: SolutionMetrics,
+  label?: string
+): void {
+  const data = loadSaveData();
+  if (!data.solutions) {
+    data.solutions = {};
+  }
+  if (!data.solutions[puzzleId]) {
+    data.solutions[puzzleId] = [];
+  }
+
+  const existingIndex = data.solutions[puzzleId].findIndex(s => s.code === code);
+  
+  const newSolution: SavedSolution = {
+    code,
+    metrics,
+    timestamp: Date.now(),
+    label
+  };
+
+  if (existingIndex !== -1) {
+    data.solutions[puzzleId][existingIndex] = newSolution;
+  } else {
+    data.solutions[puzzleId].push(newSolution);
+  }
+
+  // Limit solutions to top 20, keeping newest
+  if (data.solutions[puzzleId].length > 20) {
+    data.solutions[puzzleId].sort((a, b) => b.timestamp - a.timestamp);
+    data.solutions[puzzleId] = data.solutions[puzzleId].slice(0, 20);
+  }
+
+  writeSaveData(data);
+}
+
+export function deletePuzzleSolution(puzzleId: string, timestamp: number): void {
+  const data = loadSaveData();
+  if (data.solutions && data.solutions[puzzleId]) {
+    data.solutions[puzzleId] = data.solutions[puzzleId].filter(s => s.timestamp !== timestamp);
+    writeSaveData(data);
+  }
+}
+
+export function getSavedSolutions(puzzleId: string): SavedSolution[] {
+  const data = loadSaveData();
+  if (!data.solutions) return [];
+  return data.solutions[puzzleId] || [];
+}
+

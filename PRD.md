@@ -167,7 +167,7 @@ before you ever hand it to the progression system.
 ---
 
 ### Milestone 4 — Solution Tracking & Optimization Metrics
-**Status:** ☐ Not started
+**Status:** ☑ Done
 
 **Steps:**
 1. On puzzle success, compute metrics already available from the action queue: total
