@@ -13,7 +13,6 @@ import { InspectorPanel } from './InspectorPanel';
 import { IsometricVisualEngine } from './IsometricVisualEngine';
 import { ObjectiveCard } from './ObjectiveCard';
 import { PlaygroundPanel } from './PlaygroundPanel';
-import { DebuggerPanel } from './DebuggerPanel';
 import { Award } from 'lucide-react';
 
 interface GameViewProps {
@@ -108,17 +107,13 @@ export const GameView: React.FC<GameViewProps> = ({
               toggleSound={toggleSound}
             />
 
-            {isDebugMode && (
-              <DebuggerPanel
-                actionQueue={actionQueue}
-                currentIndex={currentIndex}
-              />
-            )}
-
-            <div className="h-36 shrink-0 min-h-0">
+            <div className="h-52 shrink-0 min-h-0">
               <ConsoleTerminal 
                 consoleLogs={consoleLogs} 
                 clearLogs={clearLogs} 
+                actionQueue={actionQueue}
+                currentIndex={currentIndex}
+                isDebugMode={isDebugMode}
               />
             </div>
           </div>
@@ -169,17 +164,13 @@ export const GameView: React.FC<GameViewProps> = ({
               toggleSound={toggleSound}
             />
 
-            {isDebugMode && (
-              <DebuggerPanel
-                actionQueue={actionQueue}
-                currentIndex={currentIndex}
-              />
-            )}
-
-            <div className="h-36 shrink-0 min-h-0">
+            <div className="h-52 shrink-0 min-h-0">
               <ConsoleTerminal 
                 consoleLogs={consoleLogs} 
                 clearLogs={clearLogs} 
+                actionQueue={actionQueue}
+                currentIndex={currentIndex}
+                isDebugMode={isDebugMode}
               />
             </div>
           </div>
