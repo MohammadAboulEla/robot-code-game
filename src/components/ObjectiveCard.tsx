@@ -25,13 +25,13 @@ export const ObjectiveCard: React.FC<ObjectiveCardProps> = ({ puzzle, hideWrappe
     : 'N/A';
 
   return (
-    <div className={`relative overflow-hidden transition-all duration-200 ${
-      hideWrapper ? '' : 'border-2 border-dashed border-[#9c3526]/50 bg-[#faf8f2] shadow-sm'
-    }`}>
+    <div className="border-2 border-dashed border-[#9c3526]/50 bg-[#faf8f2] shadow-sm relative overflow-hidden transition-all duration-200">
       {/* Header / Clickable Toggle Bar */}
       <div
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="flex items-center justify-between p-4 cursor-pointer hover:bg-[#eae3ce]/20 select-none"
+        onClick={hideWrapper ? undefined : () => setIsExpanded(!isExpanded)}
+        className={`flex items-center justify-between p-4 select-none ${
+          hideWrapper ? '' : 'cursor-pointer hover:bg-[#eae3ce]/20'
+        }`}
       >
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="p-1 bg-[#9c3526]/10 text-[#9c3526] border border-[#9c3526]/20 shrink-0">
@@ -39,17 +39,19 @@ export const ObjectiveCard: React.FC<ObjectiveCardProps> = ({ puzzle, hideWrappe
           </div>
           <div className="min-w-0">
             <h2 className="text-xs font-bold text-[#2e2a22] tracking-tight font-serif uppercase truncate">
-              PROTOCOL OBJECTIVE: {puzzle.title} {!isExpanded && <span className="text-[#8a7e6b] font-mono font-normal normal-case ml-2">· Target: {targetCoords}</span>}
+              PROTOCOL OBJECTIVE: {puzzle.title} {(!isExpanded && !hideWrapper) && <span className="text-[#8a7e6b] font-mono font-normal normal-case ml-2">· Target: {targetCoords}</span>}
             </h2>
           </div>
         </div>
-        <div className="text-[#5c5341] hover:text-[#9c3526] transition-colors p-0.5">
-          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        </div>
+        {!hideWrapper && (
+          <div className="text-[#5c5341] hover:text-[#9c3526] transition-colors p-0.5">
+            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </div>
+        )}
       </div>
 
       {/* Expanded Details */}
-      {isExpanded && (
+      {(isExpanded || hideWrapper) && (
         <div className="px-6 pb-6 pt-0 border-t border-dashed border-[#9c3526]/30">
           <p className="text-xs text-[#5c5341] mt-3 leading-relaxed">
             {puzzle.description}
