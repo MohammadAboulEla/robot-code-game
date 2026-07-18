@@ -30,14 +30,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   toggleSound
 }) => {
   return (
-    <div className="border border-[#3e382d] bg-[#faf8f2] shadow-sm flex flex-col md:flex-row md:divide-x divide-[#3e382d] select-none font-mono">
+<div className="border border-[#3e382d] bg-[#faf8f2] shadow-sm flex flex-col md:flex-row md:divide-x divide-[#3e382d] select-none font-mono">
       
       {/* Group 1: Execution Control */}
       <div className="flex-grow p-3.5 bg-[#eae3ce]/20 flex flex-col gap-2 min-w-[280px]">
-        <div className="text-[9px] uppercase font-bold text-[#8a7c62] tracking-wider flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 bg-[#9c3526] rounded-full inline-block"></span>
-          Execution Control
-        </div>
         <div className="flex items-center gap-2 w-full">
           {!isPlaying ? (
             <button
@@ -78,10 +74,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
       {/* Group 2: Interface Configuration */}
       <div className="p-3.5 flex flex-col gap-2 flex-shrink-0 flex-initial">
-        <div className="text-[9px] uppercase font-bold text-[#8a7c62] tracking-wider flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 bg-[#8a7c62] rounded-full inline-block"></span>
-          Interface Setup
-        </div>
         <div className="flex items-center justify-between gap-3 h-full">
           {/* Slider */}
           <div className="flex items-center gap-2">
