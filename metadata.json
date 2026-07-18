@@ -1,0 +1,6 @@
+{
+  "name": "Robot Code Game",
+  "description": "An interactive isometric programming game where you write Python code to control a robot on a grid.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
