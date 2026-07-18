@@ -97,7 +97,7 @@ this later means rewriting the interpreter's call sites multiple times.
 ---
 
 ### Milestone 1 — Puzzle Loader & Multi-Puzzle Shell
-**Status:** ☐ Not started
+**Status:** ☑ Done
 
 **Steps:**
 1. Create `src/puzzles/index.ts` exporting an ordered array/registry of all

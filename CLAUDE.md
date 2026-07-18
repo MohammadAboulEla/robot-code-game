@@ -14,36 +14,46 @@ Package manager is **pnpm** (lockfile + `pnpm-workspace.yaml` present; `allowBui
 
 ## Architecture
 
-The app is a single-page isometric "Robot Code Game": the user writes a Python-like script in an in-browser editor, which is parsed and executed against a fixed game world, then the resulting action queue is played back step-by-step on an isometric SVG grid.
+The app is a single-page isometric "Robot Code Game": the user writes a Python-like script in an in-browser editor, which is parsed and executed against a puzzle's world state, then the resulting action queue is played back step-by-step on an isometric SVG grid. The app has two screens: a **puzzle-select** view listing available missions, and a **game view** for coding and running a selected puzzle.
 
-There are only four source files and no routing/state library:
+There is no routing library — screen state is managed via `selectedPuzzle` in `App.tsx`:
 
 - `src/main.tsx` — mounts `<App />` in `StrictMode`. Nothing else.
-- `src/App.tsx` — main App container integrating modular sub-components.
+- `src/App.tsx` — two-screen shell: puzzle-select or game view. Manages `selectedPuzzle` state and command registry.
 - `src/robotInterpreter.ts` — the parser + virtual machine. The core of the project.
 - `src/index.css` — single `@import "tailwindcss";` (Tailwind v4 via `@tailwindcss/vite`, no config file, no `tailwind.config.*`).
-- `src/types/gameTypes.ts` — shared TypeScript types (e.g., `PythonToken`).
-- `src/constants/gameConstants.ts` — static configurations (`INITIAL_WORLD_STATE`, `DEFAULT_PYTHON_CODE`).
-- `src/utils/` — helper functions for parsing/rendering:
+- `src/types/gameTypes.ts` — shared TypeScript types: `PythonToken`, `CommandDefinition`, `PuzzleDefinition`, `VMState`, `CommandResult`.
+- `src/constants/gameConstants.ts` — reserved for future non-puzzle constants.
+- `src/game/commands/commands.ts` — **Command Registry**: all 6 robot commands as `CommandDefinition` entries. Exports `buildCommandRegistry(allowedIds)` and `ALL_COMMAND_IDS`.
+- `src/puzzles/` — **Puzzle registry**:
+  - `index.ts` — exports `PUZZLES: PuzzleDefinition[]` (ordered array) and `getPuzzleById(id)` helper.
+  - `001-first-delivery.ts` — first puzzle (the original hardcoded delivery scenario).
+  - `002-around-the-bend.ts` — second puzzle (L-shaped wall, 4×4 grid).
+- `src/state/saveData.ts` — **Persistence layer**: `localStorage`-backed `SaveData` with versioned schema (`schemaVersion: 1`). Exports `loadSaveData`, `writeSaveData`, `markPuzzleSolved`, `isPuzzleSolved`.
+- `src/utils/` — helper functions:
   - `pythonTokenizer.ts` — regex-based syntax tokenizer.
-  - `isometricHelpers.ts` — isometric projection coordinate calculations (`getIsoCoords`, `getTilePoints`).
-- `src/hooks/useRobotSimulation.ts` — custom React hook encapsulating simulator compilation, action queues, execution states, timers, and outcome alerts.
+  - `isometricHelpers.ts` — isometric projection coordinate calculations.
+- `src/hooks/useRobotSimulation.ts` — simulation hook. Accepts `PuzzleDefinition` + command registry + optional `onPuzzleSolved` callback. Calls `markPuzzleSolved` on success.
 - `src/components/` — presentational & interactive sub-components:
-  - `Header.tsx`, `Ticker.tsx`, `Footer.tsx` — page scaffolding.
+  - `Header.tsx` — page header with optional back button and active puzzle title.
+  - `Ticker.tsx`, `Footer.tsx` — page scaffolding.
+  - `PuzzleSelect.tsx` — puzzle-select screen with solved badges from `saveData`.
+  - `GameView.tsx` — game layout wrapper (editor + engine + controls), instantiates `useRobotSimulation`.
   - `CodeEditor.tsx` — editor text area, gutter numbers, and syntax highlighting overlay.
   - `ControlPanel.tsx` — action controllers (Run, Step Debug, Reset) and playback speed.
   - `ConsoleTerminal.tsx` — terminal logging output panel.
   - `SystemManual.tsx` — manual instructions and command APIs tabs.
   - `OrientationCompass.tsx` — direction compass indicator.
-  - `IsometricVisualEngine.tsx` — SVG grid canvas, z-sorted rendering, and floating overlay alerts.
+  - `ObjectiveCard.tsx` — dynamic puzzle objective card (accepts `PuzzleDefinition` prop).
+  - `IsometricVisualEngine.tsx` — SVG grid canvas, z-sorted rendering, floating overlay alerts.
 
 ### The interpreter pipeline (`robotInterpreter.ts`)
 
 This is the heart of the app and the most non-obvious part. The flow is:
 
-1. **`parsePython(code)`** — hand-written tokenizer-free parser. It splits code into lines, strips `#` comments, measures indentation by raw leading whitespace, then recursively builds a `Statement[]` AST via `parseBlocks`. Supported statements: `for i in range(N):`, `while <cond>:`, `if <cond>:` / `else:`, assignments (`name = expr`), bare command calls, and `pass`. Indentation is structural — mismatched indents throw `Syntax Error` with the offending 1-based line number. Line numbers are preserved on each AST node (`stmt.line`) so the UI can highlight the executing source line.
-2. **`new PythonExecutor(initialState)`** — constructs a VM over a *cloned* copy of the world state (`cloneState`). It never mutates the original.
-3. **`executor.run(ast)`** — walks the AST, mutating `this.state` and pushing one `VMAction` per executed statement. Each `VMAction` carries `beforeState` + `afterState` snapshots (deep-cloned), the source `line`, a `success` boolean, and a human-readable `message`. Crucially, execution is **fully synchronous and upfront**: the entire program runs to completion (or error) before any UI playback begins. There is no async, no generators, no pausing mid-execution.
+1. **`parsePython(code)`** — hand-written tokenizer-free parser. Unchanged from original.
+2. **`new PythonExecutor(initialState, commandRegistry)`** — constructs a VM over a *cloned* copy of the world state. Takes a `Map<string, CommandDefinition>` for command dispatch.
+3. **`executor.run(ast)`** — walks the AST, dispatching commands via registry lookup. Each command's `execute(vmState, args)` mutates the VM state in place and returns a `CommandResult { success, message }`. The executor handles before/after state cloning for `VMAction` snapshots. `MoveError` (from `commands.ts`) carries both a user-facing `displayMessage` and a thrown error message, preserving the two-message pattern. Execution is **fully synchronous and upfront**.
 4. The returned `VMAction[]` is the **action queue** that `useRobotSimulation.ts` replays via `setTimeout` at `playbackSpeed` ms/step.
 
 **Safety limits** (hardcoded, not configurable):
@@ -51,14 +61,16 @@ This is the heart of the app and the most non-obvious part. The flow is:
 - `while` loops: `200` iterations per loop → `InfiniteLoopError`.
 - These throw, which `run()` catches and converts into a final `error` action rather than re-throwing.
 
-**Robot API** (the only callable "commands", enforced in `executeCommand`):
-- `move("front"|"back"|"left"|"right")` — directions are **relative to the robot's current heading**, not absolute grid directions. `getAbsoluteDirection` maps relative → absolute (`up`/`down`/`left`/`right`). Move fails hard (throws `CollisionError` / `BoundaryError`) on obstacles or grid edges — these are terminal.
+**Robot API** (callable commands, dispatched via `CommandRegistry` in `src/game/commands/commands.ts`):
+- `move("front"|"back"|"left"|"right")` — directions are **relative to the robot's current heading**, not absolute grid directions. Move throws `MoveError` on obstacles or grid edges — these are terminal.
 - `rotate("left"|"right")` — 90° turn; updates `robot.facing`.
 - `grab()` — must be adjacent to *and facing* the box; sets `holding=true` and snaps the box onto the robot's tile.
 - `drop()` — releases the box onto the robot's current tile.
-- **Sensory helpers** (usable in `if`/`while` conditions via `evalCondition`): `is_holding()`, `can_move("front"|...)`. Conditions also support `not`, `==`, and `True`/`False` literals. The condition evaluator is a small ad-hoc string matcher, not a real expression parser — only the specific forms in `evalCondition` are recognized; anything else throws `RuntimeError`.
+- **Sensory helpers** (evaluated inline in `evalCondition`, not via the command registry): `is_holding()`, `can_move("front"|...)`. They are registered in the registry for documentation/metadata purposes but their `execute` is a no-op.
 
-**Win condition**: checked once at the end of `run()`: box on target tile and robot not holding it → emits a `success` action. Otherwise emits a `pass` action with a "not on target" / "still holding" message. The world state is **fixed** (`INITIAL_WORLD_STATE` in `src/constants/gameConstants.ts`, 5×5 grid with three obstacles in a wall at X=2); there is no level system and the world cannot be edited from the UI.
+**Win condition**: checked once at the end of `run()`: box on target tile and robot not holding it → emits a `success` action.
+
+**Puzzle system**: World state is derived from a `PuzzleDefinition` (in `src/puzzles/`), not hardcoded. `useRobotSimulation` accepts a `PuzzleDefinition` + command registry. `App.tsx` builds the registry with `buildCommandRegistry(ALL_COMMAND_IDS)` (all unlocked until progression exists).
 
 ### Architecture & Components structure
 

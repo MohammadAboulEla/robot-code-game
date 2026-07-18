@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { PuzzleDefinition, CommandDefinition } from '../types/gameTypes';
 import { parsePython, PythonExecutor, cloneState, GameWorldState, VMAction } from '../robotInterpreter';
+import { markPuzzleSolved } from '../state/saveData';
 
 /**
  * Derives a GameWorldState from a PuzzleDefinition.
@@ -26,7 +27,11 @@ function puzzleToWorldState(puzzle: PuzzleDefinition): GameWorldState {
   };
 }
 
-export function useRobotSimulation(puzzle: PuzzleDefinition, commandRegistry: Map<string, CommandDefinition>) {
+export function useRobotSimulation(
+  puzzle: PuzzleDefinition,
+  commandRegistry: Map<string, CommandDefinition>,
+  onPuzzleSolved?: () => void
+) {
   const initialWorld = puzzleToWorldState(puzzle);
 
   const [code, setCode] = useState(puzzle.starterCode);
@@ -80,6 +85,8 @@ export function useRobotSimulation(puzzle: PuzzleDefinition, commandRegistry: Ma
       setIsSuccess(true);
       setIsPlaying(false);
       logMessage(`🏆 Protocol Complete: SUCCESS!`);
+      markPuzzleSolved(puzzle.id);
+      onPuzzleSolved?.();
     }
 
     setWorldState(action.afterState);
