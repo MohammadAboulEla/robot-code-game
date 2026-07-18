@@ -66,18 +66,26 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
     }`}>
       
       {/* Viewport Header */}
-      <div className="border-b border-[#3e382d] px-4 py-3 bg-[#eae3ce] flex justify-between items-center shrink-0">
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-[#9c3526]" />
-          <span className="text-xs font-bold text-[#2e2a22] tracking-wider uppercase font-mono">Isometric Visual Engine</span>
+      {!hideWrapper && (
+        <div className="border-b border-[#3e382d] px-4 py-3 bg-[#eae3ce] flex justify-between items-center shrink-0">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-[#9c3526]" />
+            <span className="text-xs font-bold text-[#2e2a22] tracking-wider uppercase font-mono">Isometric Visual Engine</span>
+          </div>
+          <div className="text-xs text-[#5c5341] font-mono">
+            {hoveredTile ? `TILE MAP: [${hoveredTile.x}, ${hoveredTile.y}]` : 'Hover grid for coordinates'}
+          </div>
         </div>
-        <div className="text-xs text-[#5c5341] font-mono">
-          {hoveredTile ? `TILE MAP: [${hoveredTile.x}, ${hoveredTile.y}]` : 'Hover grid for coordinates'}
-        </div>
-      </div>
+      )}
 
       {/* Isometric Render Window */}
       <div className="relative w-full flex-grow flex-1 min-h-0 bg-[#faf8f2] flex items-center justify-center p-4">
+        {/* HUD coordinates overlay when nested in tab panel */}
+        {hideWrapper && (
+          <div className="absolute top-3 right-3 bg-[#faf8f2]/95 border border-[#3e382d] px-2 py-1 text-[10px] font-mono text-[#5c5341] shadow-sm select-none pointer-events-none z-10">
+            {hoveredTile ? `TILE MAP: [${hoveredTile.x}, ${hoveredTile.y}]` : 'Hover grid for coordinates'}
+          </div>
+        )}
         
         <svg 
           viewBox="0 0 500 320" 
