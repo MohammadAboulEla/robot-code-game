@@ -151,12 +151,13 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
             actionQueue={actionQueue}
             currentIndex={currentIndex}
             isDebugMode={isDebugMode}
+            hideWrapper={true}
           />
         )}
         
         {activeTab === 'objective' && (
           <div className="p-4 overflow-y-auto flex-1 select-text">
-            <ObjectiveCard puzzle={puzzle} />
+            <ObjectiveCard puzzle={puzzle} hideWrapper={true} />
           </div>
         )}
 

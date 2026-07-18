@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Terminal, Cpu, ChevronDown, ChevronUp } from 'lucide-react';
 import { DebuggerPanel } from './DebuggerPanel';
 import type { VMAction } from '../robotInterpreter';
@@ -28,6 +28,13 @@ export const ConsoleTerminal: React.FC<ConsoleTerminalProps> = ({
   onToggleCollapse
 }) => {
   const [activeTab, setActiveTab] = useState<'terminal' | 'debugger'>('terminal');
+  const terminalBodyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (activeTab === 'terminal' && terminalBodyRef.current) {
+      terminalBodyRef.current.scrollTop = terminalBodyRef.current.scrollHeight;
+    }
+  }, [consoleLogs.length, activeTab]);
 
   return (
     <div className="bg-[#f4efe1] border border-[#3e382d] shadow-sm overflow-hidden flex flex-col h-full font-mono text-xs text-[#2e2a22]">
@@ -94,7 +101,10 @@ export const ConsoleTerminal: React.FC<ConsoleTerminalProps> = ({
       {!isCollapsed && (
         <div className="flex-grow flex-1 min-h-0 bg-[#faf8f2] flex flex-col overflow-hidden">
           {activeTab === 'terminal' && (
-            <div className="p-4 flex-grow overflow-y-auto space-y-1.5">
+            <div 
+              ref={terminalBodyRef}
+              className="p-4 flex-grow overflow-y-auto space-y-1.5"
+            >
               {consoleLogs.map((log, index) => (
                 <div key={`log-${index}`} className="border-l-2 border-[#eae3ce] pl-2.5">
                   {log}

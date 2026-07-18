@@ -9,9 +9,10 @@ import type { PuzzleDefinition } from '../types/gameTypes';
 
 interface ObjectiveCardProps {
   puzzle: PuzzleDefinition;
+  hideWrapper?: boolean;
 }
 
-export const ObjectiveCard: React.FC<ObjectiveCardProps> = ({ puzzle }) => {
+export const ObjectiveCard: React.FC<ObjectiveCardProps> = ({ puzzle, hideWrapper = false }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   // Auto-expand when a puzzle loads or reloads
@@ -24,7 +25,9 @@ export const ObjectiveCard: React.FC<ObjectiveCardProps> = ({ puzzle }) => {
     : 'N/A';
 
   return (
-    <div className="border-2 border-dashed border-[#9c3526]/50 bg-[#faf8f2] shadow-sm relative overflow-hidden transition-all duration-200">
+    <div className={`relative overflow-hidden transition-all duration-200 ${
+      hideWrapper ? '' : 'border-2 border-dashed border-[#9c3526]/50 bg-[#faf8f2] shadow-sm'
+    }`}>
       {/* Header / Clickable Toggle Bar */}
       <div
         onClick={() => setIsExpanded(!isExpanded)}

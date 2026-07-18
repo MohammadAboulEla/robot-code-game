@@ -12,6 +12,7 @@ interface IsometricVisualEngineProps {
   actionQueue?: VMAction[];
   currentIndex?: number;
   isDebugMode?: boolean;
+  hideWrapper?: boolean;
 }
 
 function getActionToastMessage(action: VMAction): string {
@@ -47,7 +48,8 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
   resetSimulation,
   actionQueue,
   currentIndex,
-  isDebugMode = false
+  isDebugMode = false,
+  hideWrapper = false
 }) => {
   const [hoveredTile, setHoveredTile] = useState<{ x: number; y: number } | null>(null);
 
@@ -57,7 +59,9 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
   const toastMsg = currentAction ? getActionToastMessage(currentAction) : '';
 
   return (
-    <div className={`bg-[#f4efe1] border border-[#3e382d] shadow-sm relative flex flex-col overflow-hidden flex-1 min-h-0 h-full ${
+    <div className={`relative flex flex-col overflow-hidden flex-1 min-h-0 h-full ${
+      hideWrapper ? '' : 'bg-[#f4efe1] border border-[#3e382d] shadow-sm'
+    } ${
       (isDebugMode && errorMessage) ? 'animate-shake' : ''
     }`}>
       
