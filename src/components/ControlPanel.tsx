@@ -30,7 +30,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   toggleSound
 }) => {
   return (
-    <div className="border border-[#3e382d] bg-[#eae3ce] shadow-sm flex items-center justify-between select-none font-mono px-3 py-1 shrink-0 h-9">
+    <div className="border border-[#3e382d] bg-[#eae3ce] shadow-sm flex items-center justify-between select-none font-mono px-2 py-1 shrink-0 h-9">
       {/* Left side: execution controls */}
       <div className="flex items-center gap-1.5">
         {!isPlaying ? (
@@ -62,10 +62,10 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
 
         <button
           onClick={resetSimulation}
-          className="p-1 bg-[#faf8f2] hover:bg-[#eae3ce] text-[#5c5341] border border-[#3e382d] cursor-pointer flex items-center justify-center transition-colors"
+          className="py-1 px-2.5 bg-[#faf8f2] hover:bg-[#eae3ce] text-[#5c5341] border border-[#3e382d] cursor-pointer flex items-center justify-center transition-colors"
           title="Reset Simulation"
         >
-          <RotateCcw className="w-3 h-3" />
+          <RotateCcw className="w-3.5 h-3.5" />
         </button>
       </div>
 
@@ -92,14 +92,14 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         {/* Audio Toggle */}
         <button
           onClick={toggleSound}
-          className={`p-1 border transition-colors cursor-pointer flex items-center justify-center ${
+          className={`py-1 px-2.5 border transition-colors cursor-pointer flex items-center justify-center ${
             soundEnabled 
               ? 'bg-[#e2ebd5] border-[#81a364] text-[#4a6b2a] hover:bg-[#d6e2c6]' 
               : 'bg-[#faf8f2] border-[#3e382d] text-[#8a7c62] hover:bg-[#eae3ce]'
           }`}
           title={soundEnabled ? "Mute" : "Unmute"}
         >
-          {soundEnabled ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
+          {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
         </button>
       </div>
     </div>
