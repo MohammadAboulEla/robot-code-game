@@ -24,12 +24,13 @@ export interface GameWorldState {
 export interface VMAction {
   id: string;
   line: number;
-  type: 'move' | 'rotate' | 'grab' | 'drop' | 'assign' | 'loop_step' | 'pass' | 'error' | 'success';
+  type: 'move' | 'rotate' | 'grab' | 'drop' | 'assign' | 'loop_step' | 'pass' | 'error' | 'success' | 'if_step';
   args: any[];
   success: boolean;
   message?: string;
   beforeState: GameWorldState;
   afterState: GameWorldState;
+  variables?: Record<string, any>;
 }
 
 export type Statement =
@@ -357,7 +358,8 @@ export class PythonExecutor {
       success,
       message,
       beforeState: beforeState || cloneState(this.state),
-      afterState: afterState || cloneState(this.state)
+      afterState: afterState || cloneState(this.state),
+      variables: Object.fromEntries(this.variables)
     });
   }
 
@@ -518,7 +520,17 @@ export class PythonExecutor {
           throw new Error(`TypeError: range() expects an integer, got "${stmt.rangeExpr}"`);
         }
         for (let i = 0; i < rangeVal; i++) {
+          const iterBefore = cloneState(this.state);
           this.variables.set(stmt.iterator, i);
+          this.addAction(
+            stmt.line,
+            'assign',
+            [stmt.iterator, i],
+            true,
+            undefined,
+            iterBefore,
+            cloneState(this.state)
+          );
           this.executeBlock(stmt.body);
         }
         continue;
@@ -526,7 +538,20 @@ export class PythonExecutor {
 
       if (stmt.type === 'while') {
         let loopLimit = 0;
-        while (this.evalCondition(stmt.conditionExpr)) {
+        while (true) {
+          const checkBefore = cloneState(this.state);
+          const cond = this.evalCondition(stmt.conditionExpr);
+          this.addAction(
+            stmt.line,
+            'loop_step',
+            [stmt.conditionExpr, cond],
+            true,
+            `While check: "${stmt.conditionExpr}" evaluates to ${cond ? 'True' : 'False'}`,
+            checkBefore,
+            cloneState(this.state)
+          );
+          if (!cond) break;
+
           loopLimit++;
           if (loopLimit > 200) {
             throw new Error(`InfiniteLoopError: While loop on line ${stmt.line} exceeded limit of 200 iterations.`);
@@ -537,7 +562,17 @@ export class PythonExecutor {
       }
 
       if (stmt.type === 'if') {
+        const checkBefore = cloneState(this.state);
         const cond = this.evalCondition(stmt.conditionExpr);
+        this.addAction(
+          stmt.line,
+          'if_step',
+          [stmt.conditionExpr, cond],
+          true,
+          `If check: "${stmt.conditionExpr}" evaluates to ${cond ? 'True' : 'False'}`,
+          checkBefore,
+          cloneState(this.state)
+        );
         if (cond) {
           this.executeBlock(stmt.body);
         } else if (stmt.elseBody) {

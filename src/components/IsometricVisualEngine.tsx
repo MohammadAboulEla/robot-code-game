@@ -1,11 +1,6 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useState } from 'react';
 import { Layers, CheckCircle2, XCircle } from 'lucide-react';
-import { GameWorldState } from '../robotInterpreter';
+import { GameWorldState, VMAction } from '../robotInterpreter';
 import { tileW, tileH, getIsoCoords, getTilePoints } from '../utils/isometricHelpers';
 
 interface IsometricVisualEngineProps {
@@ -14,6 +9,34 @@ interface IsometricVisualEngineProps {
   errorMessage: string | null;
   setErrorMessage: (msg: string | null) => void;
   resetSimulation: () => void;
+  actionQueue?: VMAction[];
+  currentIndex?: number;
+  isDebugMode?: boolean;
+}
+
+function getActionToastMessage(action: VMAction): string {
+  switch (action.type) {
+    case 'move':
+      return action.success ? 'Robot moved forward.' : 'Movement blocked!';
+    case 'rotate':
+      return `Robot rotated ${action.args[0]}.`;
+    case 'grab':
+      return action.success ? 'Cargo picked up.' : 'Grab failed: no cargo!';
+    case 'drop':
+      return action.success ? 'Cargo deposited.' : 'Drop failed: not holding!';
+    case 'assign':
+      return `Variable set: ${action.args[0]} = ${action.args[1]}`;
+    case 'loop_step':
+      return `Loop check: ${action.args[0]} is ${action.args[1] ? 'True' : 'False'}`;
+    case 'if_step':
+      return `Condition check: ${action.args[0]} is ${action.args[1] ? 'True' : 'False'}`;
+    case 'success':
+      return 'Objective completed!';
+    case 'error':
+      return `Halted: ${action.message}`;
+    default:
+      return '';
+  }
 }
 
 export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
@@ -21,12 +44,22 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
   isSuccess,
   errorMessage,
   setErrorMessage,
-  resetSimulation
+  resetSimulation,
+  actionQueue,
+  currentIndex,
+  isDebugMode = false
 }) => {
   const [hoveredTile, setHoveredTile] = useState<{ x: number; y: number } | null>(null);
 
+  const currentAction = isDebugMode && actionQueue && currentIndex !== undefined && currentIndex >= 0 
+    ? actionQueue[currentIndex] 
+    : null;
+  const toastMsg = currentAction ? getActionToastMessage(currentAction) : '';
+
   return (
-    <div className="bg-[#f4efe1] border border-[#3e382d] shadow-sm relative flex flex-col overflow-hidden">
+    <div className={`bg-[#f4efe1] border border-[#3e382d] shadow-sm relative flex flex-col overflow-hidden ${
+      (isDebugMode && errorMessage) ? 'animate-shake' : ''
+    }`}>
       
       {/* Viewport Header */}
       <div className="border-b border-[#3e382d] px-4 py-3 bg-[#eae3ce] flex justify-between items-center">
@@ -334,10 +367,18 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
           </g>
         </svg>
 
+        {/* Step Toast Overlay */}
+        {isDebugMode && toastMsg && (
+          <div key={`toast-${currentIndex}`} className="absolute top-4 left-4 bg-[#2e2a22]/90 border border-[#eae3ce]/30 px-3 py-1.5 text-[#faf8f2] text-[10px] font-mono shadow-md animate-slide-in-right flex items-center gap-1.5 z-10">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+            <span>{toastMsg}</span>
+          </div>
+        )}
+
         {/* Outcome Floating Modals (Success & Error feedback overlay) */}
         {isSuccess && (
-          <div className="absolute inset-0 bg-[#2e2a22]/40 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in">
-            <div className="bg-[#faf8f2] border border-[#3e382d] p-6 rounded-none max-w-sm text-center shadow-lg relative overflow-hidden">
+          <div className="absolute inset-0 bg-[#2e2a22]/40 backdrop-blur-sm flex items-center justify-center p-6 animate-fade-in z-20">
+            <div className="bg-[#faf8f2] border border-[#3e382d] p-6 rounded-none max-w-sm text-center shadow-lg relative overflow-hidden animate-bubble">
               <div className="w-12 h-12 bg-[#81a364]/10 text-[#4d7c0f] rounded-none flex items-center justify-center mx-auto mb-4 border border-[#81a364]/30 shadow-sm">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
@@ -358,7 +399,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
         )}
 
         {errorMessage && (
-          <div className="absolute inset-x-4 bottom-4 bg-[#faf8f2] border-l-4 border-[#9c3526] p-4 shadow-md animate-slide-up">
+          <div className="absolute inset-x-4 bottom-4 bg-[#faf8f2] border-l-4 border-[#9c3526] p-4 shadow-md animate-slide-up z-20">
             <div className="flex items-start gap-3">
               <div className="p-1 bg-[#9c3526]/10 text-[#9c3526] border border-[#9c3526]/20 mt-0.5">
                 <XCircle className="w-4 h-4" />

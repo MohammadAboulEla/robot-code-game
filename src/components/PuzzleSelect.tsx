@@ -1,13 +1,9 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useState } from 'react';
-import { CheckCircle2, Lock, ChevronRight, Map, BookOpen } from 'lucide-react';
+import { CheckCircle2, Lock, ChevronRight, Map, BookOpen, Award } from 'lucide-react';
 import type { PuzzleDefinition } from '../types/gameTypes';
 import { isPuzzleSolved } from '../state/saveData';
 import { ResearchTree } from './ResearchTree';
+import { AchievementsPanel } from './AchievementsPanel';
 
 interface PuzzleSelectProps {
   puzzles: PuzzleDefinition[];
@@ -23,6 +19,7 @@ export const PuzzleSelect: React.FC<PuzzleSelectProps> = ({
   onSelectPuzzle
 }) => {
   const [showTree, setShowTree] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
 
   if (showTree) {
     return (
@@ -33,9 +30,17 @@ export const PuzzleSelect: React.FC<PuzzleSelectProps> = ({
     );
   }
 
+  if (showAchievements) {
+    return (
+      <AchievementsPanel
+        onClose={() => setShowAchievements(false)}
+      />
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-6 py-10">
-      {/* Section header & Research Tree button */}
+      {/* Section header & Buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-[#9c3526]/10 text-[#9c3526] border border-[#9c3526]/20">
@@ -51,13 +56,23 @@ export const PuzzleSelect: React.FC<PuzzleSelectProps> = ({
           </div>
         </div>
 
-        <button
-          onClick={() => setShowTree(true)}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 border border-[#3e382d] bg-[#f4efe1] hover:bg-[#faf8f2] hover:text-[#9c3526] text-xs font-bold font-mono uppercase tracking-wider transition-colors cursor-pointer self-start sm:self-auto"
-        >
-          <BookOpen className="w-4 h-4" />
-          Research Tree
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={() => setShowTree(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 border border-[#3e382d] bg-[#f4efe1] hover:bg-[#faf8f2] hover:text-[#9c3526] text-xs font-bold font-mono uppercase tracking-wider transition-colors cursor-pointer"
+          >
+            <BookOpen className="w-4 h-4" />
+            Research Tree
+          </button>
+
+          <button
+            onClick={() => setShowAchievements(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 border border-[#3e382d] bg-[#f4efe1] hover:bg-[#faf8f2] hover:text-amber-800 text-xs font-bold font-mono uppercase tracking-wider transition-colors cursor-pointer"
+          >
+            <Award className="w-4 h-4" />
+            Achievements
+          </button>
+        </div>
       </div>
 
       {/* Puzzle list */}

@@ -15,6 +15,8 @@ import { IsometricVisualEngine } from './IsometricVisualEngine';
 import { ObjectiveCard } from './ObjectiveCard';
 import { PlaygroundPanel } from './PlaygroundPanel';
 import { SolutionsPanel } from './SolutionsPanel';
+import { DebuggerPanel } from './DebuggerPanel';
+import { Award } from 'lucide-react';
 
 interface GameViewProps {
   puzzle: PuzzleDefinition;
@@ -57,9 +59,13 @@ export const GameView: React.FC<GameViewProps> = ({
     stepSimulation,
     pauseSimulation,
     resetSimulation,
-    loadSolutionPreset,
-    loadBlankTemplate,
     actionQueue,
+    currentIndex,
+    isDebugMode,
+    soundEnabled,
+    toggleSound,
+    unlockedAchievement,
+    setUnlockedAchievement,
     savedSolutions,
     deleteSolution,
     loadSolution
@@ -82,7 +88,7 @@ export const GameView: React.FC<GameViewProps> = ({
             />
           </div>
 
-          {/* Column 2: Code Editor, Control Panel & Terminal */}
+          {/* Column 2: Code Editor, Control Panel, Debugger & Terminal */}
           <div className="lg:col-span-4 space-y-6">
             <CodeEditor 
               code={code} 
@@ -98,7 +104,16 @@ export const GameView: React.FC<GameViewProps> = ({
               pauseSimulation={pauseSimulation}
               stepSimulation={stepSimulation}
               resetSimulation={resetSimulation}
+              soundEnabled={soundEnabled}
+              toggleSound={toggleSound}
             />
+
+            {isDebugMode && (
+              <DebuggerPanel
+                actionQueue={actionQueue}
+                currentIndex={currentIndex}
+              />
+            )}
 
             <ConsoleTerminal 
               consoleLogs={consoleLogs} 
@@ -114,6 +129,9 @@ export const GameView: React.FC<GameViewProps> = ({
               errorMessage={errorMessage}
               setErrorMessage={setErrorMessage}
               resetSimulation={resetSimulation}
+              actionQueue={actionQueue}
+              currentIndex={currentIndex}
+              isDebugMode={isDebugMode}
             />
 
             <ObjectiveCard puzzle={puzzle} />
@@ -150,7 +168,16 @@ export const GameView: React.FC<GameViewProps> = ({
               pauseSimulation={pauseSimulation}
               stepSimulation={stepSimulation}
               resetSimulation={resetSimulation}
+              soundEnabled={soundEnabled}
+              toggleSound={toggleSound}
             />
+
+            {isDebugMode && (
+              <DebuggerPanel
+                actionQueue={actionQueue}
+                currentIndex={currentIndex}
+              />
+            )}
 
             <ConsoleTerminal 
               consoleLogs={consoleLogs} 
@@ -170,6 +197,9 @@ export const GameView: React.FC<GameViewProps> = ({
               errorMessage={errorMessage}
               setErrorMessage={setErrorMessage}
               resetSimulation={resetSimulation}
+              actionQueue={actionQueue}
+              currentIndex={currentIndex}
+              isDebugMode={isDebugMode}
             />
 
             <ObjectiveCard puzzle={puzzle} />
@@ -182,6 +212,26 @@ export const GameView: React.FC<GameViewProps> = ({
               currentCode={code}
             />
           </div>
+        </div>
+      )}
+
+      {/* Floating Achievement Toast */}
+      {unlockedAchievement && (
+        <div className="fixed bottom-6 right-6 bg-[#2e2a22] border-2 border-amber-500 text-amber-100 p-4 shadow-2xl z-50 flex items-center gap-3 animate-slide-in-right max-w-sm font-mono">
+          <div className="p-2 bg-amber-500/20 text-amber-400 border border-amber-500/40 flex-shrink-0">
+            <Award className="w-6 h-6 animate-bounce" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[9px] text-amber-500 font-bold uppercase tracking-wider">Achievement Unlocked!</div>
+            <h4 className="text-xs font-bold uppercase font-serif text-[#faf8f2] mt-0.5 truncate">{unlockedAchievement.title}</h4>
+            <p className="text-[10px] text-amber-200/80 mt-0.5 leading-tight">{unlockedAchievement.description}</p>
+          </div>
+          <button 
+            onClick={() => setUnlockedAchievement(null)}
+            className="text-amber-500 hover:text-amber-300 ml-2 font-bold cursor-pointer text-sm"
+          >
+            ✕
+          </button>
         </div>
       )}
     </main>

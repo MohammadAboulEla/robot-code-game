@@ -187,7 +187,7 @@ solutions, and you can see which one is more "efficient" by the chosen metric.
 
 ---
 
-### Milestone 5 — In-App Puzzle Editor
+### Milestone 5 — In-App Puzzle Editor (SKIP FOR NOW)
 **Status:** ☐ Not started
 
 **Steps:**
@@ -205,9 +205,8 @@ solutions, and you can see which one is more "efficient" by the chosen metric.
 through UI, export it, and load it back into the playground without hand-writing JSON.
 
 ---
-
 ### Milestone 6 — Debugging & Feedback Polish ("debugging is fun")
-**Status:** ☐ Not started
+**Status:** ☑ Done
 
 **Steps:**
 1. Improve step-debugger: show variable/state diffs per step (not just world-state

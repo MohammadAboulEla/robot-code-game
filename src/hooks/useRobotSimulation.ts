@@ -6,8 +6,11 @@
 import { useState, useEffect, useRef } from 'react';
 import type { PuzzleDefinition, CommandDefinition } from '../types/gameTypes';
 import { parsePython, PythonExecutor, cloneState, GameWorldState, VMAction } from '../robotInterpreter';
-import { markPuzzleSolved, savePuzzleSolution, deletePuzzleSolution, getSavedSolutions } from '../state/saveData';
+import { markPuzzleSolved, savePuzzleSolution, deletePuzzleSolution, getSavedSolutions, loadSaveData } from '../state/saveData';
 import type { SavedSolution } from '../types/gameTypes';
+import { isSoundEnabled, setSoundEnabled, playSynthSound } from '../utils/audio';
+import { ACHIEVEMENTS, getEarnedAchievements } from '../progression/achievements';
+import type { Achievement } from '../progression/achievements';
 
 /**
  * Derives a GameWorldState from a PuzzleDefinition.
@@ -38,9 +41,16 @@ export function useRobotSimulation(
   const [code, setCode] = useState(puzzle.starterCode);
   const [worldState, setWorldState] = useState<GameWorldState>(cloneState(initialWorld));
   
+  // Sound preference state
+  const [soundEnabled, setSoundEnabledState] = useState<boolean>(isSoundEnabled());
+  // Newly unlocked achievement toast notification
+  const [unlockedAchievement, setUnlockedAchievement] = useState<Achievement | null>(null);
+
   // Execution state
   const [actionQueue, setActionQueue] = useState<VMAction[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(-1);
+  const [isDebugMode, setIsDebugMode] = useState<boolean>(false);
+  const isDebugActiveRef = useRef<boolean>(false);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(600); // ms per step
   const [executingLine, setExecutingLine] = useState<number | null>(null);
@@ -75,6 +85,8 @@ export function useRobotSimulation(
   };
 
   const applyStepState = (action: VMAction, currentActions: VMAction[] = actionQueue) => {
+    const isDebug = isDebugActiveRef.current;
+
     // Log step outcomes
     if (action.message) {
       if (action.success) {
@@ -83,7 +95,19 @@ export function useRobotSimulation(
         logMessage(`❌ Line ${action.line} Error: ${action.message}`);
         setErrorMessage(action.message);
         setIsPlaying(false);
+        if (isDebug) {
+          playSynthSound('fail');
+        }
       }
+    } else if (!action.success) {
+      if (isDebug) {
+        playSynthSound('fail');
+      }
+    }
+
+    // Play step sounds for normal successful instructions
+    if (isDebug && action.success && action.type !== 'success' && action.type !== 'error') {
+      playSynthSound('step');
     }
 
     // Handle special statuses
@@ -107,11 +131,33 @@ export function useRobotSimulation(
         steps: physicalActions
       };
       
+      // Capture achievements earned before this solution is saved
+      const beforeEarned = getEarnedAchievements(loadSaveData());
+
       savePuzzleSolution(puzzle.id, code, metrics);
       setSavedSolutions(getSavedSolutions(puzzle.id));
 
       markPuzzleSolved(puzzle.id);
       onPuzzleSolved?.();
+
+      if (isDebug) {
+        // Capture achievements earned after saving
+        const afterEarned = getEarnedAchievements(loadSaveData());
+        const newlyUnlocked = afterEarned.filter(id => !beforeEarned.includes(id));
+
+        if (newlyUnlocked.length > 0) {
+          playSynthSound('achievement');
+          const nextAch = ACHIEVEMENTS.find(a => a.id === newlyUnlocked[0]);
+          if (nextAch) {
+            setUnlockedAchievement(nextAch);
+            setTimeout(() => {
+              setUnlockedAchievement(null);
+            }, 4000);
+          }
+        } else {
+          playSynthSound('success');
+        }
+      }
     }
 
     setWorldState(action.afterState);
@@ -119,6 +165,8 @@ export function useRobotSimulation(
 
   // Run the full Python simulator
   const runSimulation = () => {
+    isDebugActiveRef.current = false;
+    setIsDebugMode(false);
     resetSimulationStateOnly();
     
     try {
@@ -146,6 +194,9 @@ export function useRobotSimulation(
 
   // Run a single step (Debug mode)
   const stepSimulation = () => {
+    isDebugActiveRef.current = true;
+    setIsDebugMode(true);
+
     // If not compiled yet, compile first
     if (actionQueue.length === 0) {
       try {
@@ -165,6 +216,7 @@ export function useRobotSimulation(
         const msg = err.message || 'Syntax Verification failed.';
         setErrorMessage(msg);
         logMessage(`❌ Compile Error: ${msg}`);
+        playSynthSound('fail');
         return;
       }
     }
@@ -222,6 +274,9 @@ export function useRobotSimulation(
     setErrorMessage(null);
     setIsSuccess(false);
     setWorldState(cloneState(initialWorld));
+    
+    setIsDebugMode(false);
+    isDebugActiveRef.current = false;
   };
 
   const resetSimulation = () => {
@@ -259,6 +314,13 @@ export function useRobotSimulation(
     setConsoleLogs(['Loaded archived protocol sequence from memory database.']);
   };
 
+  const toggleSound = () => {
+    const next = !soundEnabled;
+    setSoundEnabledState(next);
+    setSoundEnabled(next);
+    playSynthSound('step'); // play a quick test blip
+  };
+
   return {
     code,
     setCode,
@@ -280,6 +342,12 @@ export function useRobotSimulation(
     loadBlankTemplate,
     logMessage,
     actionQueue,
+    currentIndex,
+    isDebugMode,
+    soundEnabled,
+    toggleSound,
+    unlockedAchievement,
+    setUnlockedAchievement,
     savedSolutions,
     deleteSolution,
     loadSolution
