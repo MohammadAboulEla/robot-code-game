@@ -7,6 +7,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import type { PuzzleDefinition } from './types/gameTypes';
 import { PUZZLES } from './puzzles';
 import { buildCommandRegistry, ALL_COMMAND_IDS } from './game/commands/commands';
+import { getUnlockedCommandIds, getUnlockedNodeIds } from './state/saveData';
 import { Header } from './components/Header';
 import { Ticker } from './components/Ticker';
 import { PuzzleSelect } from './components/PuzzleSelect';
@@ -15,11 +16,19 @@ import { Footer } from './components/Footer';
 
 export default function App() {
   const [selectedPuzzle, setSelectedPuzzle] = useState<PuzzleDefinition | null>(null);
-  // Force re-render of puzzle select when a puzzle is solved (to update badges)
+  // Force re-render of puzzle select when a puzzle is solved (to update badges/unlocks)
   const [solvedCounter, setSolvedCounter] = useState(0);
 
-  // All commands unlocked until progression system exists (M2)
-  const commandRegistry = useMemo(() => buildCommandRegistry(ALL_COMMAND_IDS), []);
+  // Compute unlocked node and command IDs from save data, re-run whenever solvedCounter updates
+  const unlockedNodeIds = useMemo(() => getUnlockedNodeIds(), [solvedCounter]);
+  const unlockedCommandIds = useMemo(() => getUnlockedCommandIds(), [solvedCounter]);
+
+  // Intersect allowedCommandIds with unlockedCommandIds at runtime
+  const commandRegistry = useMemo(() => {
+    if (!selectedPuzzle) return buildCommandRegistry([]);
+    const effectiveIds = selectedPuzzle.allowedCommandIds.filter(id => unlockedCommandIds.includes(id));
+    return buildCommandRegistry(effectiveIds);
+  }, [selectedPuzzle, unlockedCommandIds]);
 
   const handleBackToPuzzles = useCallback(() => {
     setSelectedPuzzle(null);
@@ -49,6 +58,7 @@ export default function App() {
           key={selectedPuzzle.id}
           puzzle={selectedPuzzle}
           commandRegistry={commandRegistry}
+          unlockedCommandIds={unlockedCommandIds}
           onPuzzleSolved={handlePuzzleSolved}
           onBack={handleBackToPuzzles}
         />
@@ -56,6 +66,8 @@ export default function App() {
         <PuzzleSelect
           key={`puzzle-select-${solvedCounter}`}
           puzzles={PUZZLES}
+          unlockedNodeIds={unlockedNodeIds}
+          unlockedCommandIds={unlockedCommandIds}
           onSelectPuzzle={setSelectedPuzzle}
         />
       )}

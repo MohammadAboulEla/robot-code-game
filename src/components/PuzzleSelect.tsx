@@ -3,45 +3,80 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { CheckCircle2, Lock, ChevronRight, Map } from 'lucide-react';
+import React, { useState } from 'react';
+import { CheckCircle2, Lock, ChevronRight, Map, BookOpen } from 'lucide-react';
 import type { PuzzleDefinition } from '../types/gameTypes';
 import { isPuzzleSolved } from '../state/saveData';
+import { ResearchTree } from './ResearchTree';
 
 interface PuzzleSelectProps {
   puzzles: PuzzleDefinition[];
+  unlockedNodeIds: string[];
+  unlockedCommandIds: string[];
   onSelectPuzzle: (puzzle: PuzzleDefinition) => void;
 }
 
-export const PuzzleSelect: React.FC<PuzzleSelectProps> = ({ puzzles, onSelectPuzzle }) => {
+export const PuzzleSelect: React.FC<PuzzleSelectProps> = ({
+  puzzles,
+  unlockedNodeIds,
+  unlockedCommandIds,
+  onSelectPuzzle
+}) => {
+  const [showTree, setShowTree] = useState(false);
+
+  if (showTree) {
+    return (
+      <ResearchTree
+        unlockedNodeIds={unlockedNodeIds}
+        onClose={() => setShowTree(false)}
+      />
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-6 py-10">
-      {/* Section header */}
-      <div className="flex items-center gap-3 mb-8">
-        <div className="p-2.5 bg-[#9c3526]/10 text-[#9c3526] border border-[#9c3526]/20">
-          <Map className="w-6 h-6" />
+      {/* Section header & Research Tree button */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 bg-[#9c3526]/10 text-[#9c3526] border border-[#9c3526]/20">
+            <Map className="w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-[#2e2a22] tracking-tight font-serif uppercase">
+              Mission Select
+            </h2>
+            <p className="text-xs text-[#5c5341] mt-0.5">
+              Choose a protocol to execute. Complete missions to unlock new capabilities.
+            </p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-xl font-bold text-[#2e2a22] tracking-tight font-serif uppercase">
-            Mission Select
-          </h2>
-          <p className="text-xs text-[#5c5341] mt-0.5">
-            Choose a protocol to execute. Complete missions to unlock new capabilities.
-          </p>
-        </div>
+
+        <button
+          onClick={() => setShowTree(true)}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 border border-[#3e382d] bg-[#f4efe1] hover:bg-[#faf8f2] hover:text-[#9c3526] text-xs font-bold font-mono uppercase tracking-wider transition-colors cursor-pointer self-start sm:self-auto"
+        >
+          <BookOpen className="w-4 h-4" />
+          Research Tree
+        </button>
       </div>
 
       {/* Puzzle list */}
       <div className="space-y-3">
         {puzzles.map((puzzle, index) => {
           const solved = isPuzzleSolved(puzzle.id);
+          const unlocked = index === 0 || isPuzzleSolved(puzzles[index - 1].id);
 
           return (
             <button
               key={puzzle.id}
               id={`puzzle-card-${puzzle.id}`}
-              onClick={() => onSelectPuzzle(puzzle)}
-              className="w-full text-left group border border-[#3e382d]/40 bg-[#f4efe1] hover:bg-[#faf8f2] hover:border-[#9c3526]/50 transition-all duration-200 shadow-sm hover:shadow-md"
+              onClick={() => unlocked && onSelectPuzzle(puzzle)}
+              disabled={!unlocked}
+              className={`w-full text-left group border transition-all duration-200 shadow-sm ${
+                unlocked
+                  ? 'border-[#3e382d]/40 bg-[#f4efe1] hover:bg-[#faf8f2] hover:border-[#9c3526]/50 hover:shadow-md cursor-pointer'
+                  : 'border-[#3e382d]/10 bg-[#f4efe1]/40 opacity-60 cursor-not-allowed'
+              }`}
             >
               <div className="flex items-center gap-4 p-4 md:p-5">
                 {/* Index badge */}
@@ -49,19 +84,28 @@ export const PuzzleSelect: React.FC<PuzzleSelectProps> = ({ puzzles, onSelectPuz
                   flex-shrink-0 w-10 h-10 flex items-center justify-center border text-sm font-bold font-mono
                   ${solved
                     ? 'bg-[#e2ebd5] border-[#81a364] text-[#4a6b2a]'
+                    : !unlocked
+                    ? 'bg-[#eae3ce]/50 border-[#3e382d]/20 text-[#8a7e6b]'
                     : 'bg-[#f4efe1] border-[#3e382d]/30 text-[#5c5341]'
                   }
                 `}>
-                  {solved
-                    ? <CheckCircle2 className="w-5 h-5 text-[#4a6b2a]" />
-                    : String(index + 1).padStart(2, '0')
-                  }
+                  {solved ? (
+                    <CheckCircle2 className="w-5 h-5 text-[#4a6b2a]" />
+                  ) : !unlocked ? (
+                    <Lock className="w-4 h-4 text-[#8a7e6b]" />
+                  ) : (
+                    String(index + 1).padStart(2, '0')
+                  )}
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-bold text-[#2e2a22] tracking-tight font-serif uppercase group-hover:text-[#9c3526] transition-colors">
+                    <h3 className={`text-sm font-bold tracking-tight font-serif uppercase transition-colors ${
+                      unlocked 
+                        ? 'text-[#2e2a22] group-hover:text-[#9c3526]' 
+                        : 'text-[#8a7e6b]'
+                    }`}>
                       {puzzle.title}
                     </h3>
                     {solved && (
@@ -69,8 +113,15 @@ export const PuzzleSelect: React.FC<PuzzleSelectProps> = ({ puzzles, onSelectPuz
                         Solved
                       </span>
                     )}
+                    {!unlocked && (
+                      <span className="inline-flex items-center px-1.5 py-0.5 text-[9px] font-bold uppercase bg-[#eae3ce]/60 text-[#8a7e6b] border border-[#3e382d]/10 tracking-wider">
+                        Locked
+                      </span>
+                    )}
                   </div>
-                  <p className="text-xs text-[#5c5341] mt-1 leading-relaxed line-clamp-2">
+                  <p className={`text-xs mt-1 leading-relaxed line-clamp-2 ${
+                    unlocked ? 'text-[#5c5341]' : 'text-[#8a7e6b]'
+                  }`}>
                     {puzzle.description}
                   </p>
                   <div className="flex items-center gap-3 mt-2 text-[10px] text-[#8a7e6b] font-mono">
@@ -86,8 +137,12 @@ export const PuzzleSelect: React.FC<PuzzleSelectProps> = ({ puzzles, onSelectPuz
                   </div>
                 </div>
 
-                {/* Arrow */}
-                <ChevronRight className="w-5 h-5 text-[#8a7e6b] group-hover:text-[#9c3526] group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                {/* Arrow / Lock */}
+                {unlocked ? (
+                  <ChevronRight className="w-5 h-5 text-[#8a7e6b] group-hover:text-[#9c3526] group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+                ) : (
+                  <Lock className="w-4 h-4 text-[#8a7e6b]/40 flex-shrink-0" />
+                )}
               </div>
             </button>
           );

@@ -118,7 +118,7 @@ page refresh.
 ---
 
 ### Milestone 2 — Research Tree / Progression System
-**Status:** ☐ Not started
+**Status:** ☑ Done
 
 **Steps:**
 1. Design the tree data: `src/progression/tree.ts` — array of `TreeNode { id, title,

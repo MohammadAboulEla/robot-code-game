@@ -17,6 +17,7 @@ import { ObjectiveCard } from './ObjectiveCard';
 interface GameViewProps {
   puzzle: PuzzleDefinition;
   commandRegistry: Map<string, CommandDefinition>;
+  unlockedCommandIds: string[];
   onPuzzleSolved: () => void;
   onBack: () => void;
 }
@@ -24,6 +25,7 @@ interface GameViewProps {
 export const GameView: React.FC<GameViewProps> = ({
   puzzle,
   commandRegistry,
+  unlockedCommandIds,
   onPuzzleSolved,
   onBack
 }) => {
@@ -76,7 +78,7 @@ export const GameView: React.FC<GameViewProps> = ({
             clearLogs={clearLogs} 
           />
 
-          <SystemManual />
+          <SystemManual unlockedCommandIds={unlockedCommandIds} />
 
           <OrientationCompass facing={worldState.robot.facing} />
 

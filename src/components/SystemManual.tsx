@@ -4,9 +4,45 @@
  */
 
 import React, { useState } from 'react';
+import { Lock } from 'lucide-react';
+import { COMMANDS } from '../game/commands/commands';
 
-export const SystemManual: React.FC = () => {
+interface SystemManualProps {
+  unlockedCommandIds: string[];
+}
+
+export const SystemManual: React.FC<SystemManualProps> = ({ unlockedCommandIds }) => {
   const [activeTab, setActiveTab] = useState<'docs' | 'instructions'>('instructions');
+
+  const isUnlocked = (cmdId: string) => unlockedCommandIds.includes(cmdId);
+
+  const getCategoryLabel = (cmdId: string, category: string): string => {
+    if (cmdId === 'move') return 'Motion';
+    if (cmdId === 'rotate') return 'Orientation';
+    if (cmdId === 'grab' || cmdId === 'drop') return 'Actuator';
+    return category.charAt(0).toUpperCase() + category.slice(1);
+  };
+
+  const formatDocText = (text: string) => {
+    const parts = text.split(/(`[^`]+`|\*\*[^*]+\*\*)/g);
+    return parts.map((part, idx) => {
+      if (part.startsWith('`') && part.endsWith('`')) {
+        return (
+          <code key={idx} className="text-[#9c3526] bg-[#eae3ce]/50 px-1 font-mono">
+            {part.slice(1, -1)}
+          </code>
+        );
+      }
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <strong key={idx} className="font-bold">
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      return part;
+    });
+  };
 
   return (
     <div className="bg-[#f4efe1] border border-[#3e382d] shadow-sm overflow-hidden">
@@ -51,59 +87,36 @@ export const SystemManual: React.FC = () => {
           </>
         ) : (
           <div className="space-y-4">
-            <div className="border-b border-[#eae3ce] pb-3">
-              <h4 className="font-mono font-bold text-[#9c3526] text-[13px] flex items-center justify-between">
-                <span>move(direction)</span>
-                <span className="text-[10px] text-[#5c5341] uppercase font-semibold font-sans">Motion</span>
-              </h4>
-              <p className="text-[#5c5341] mt-1 leading-relaxed">
-                Moves the unit one tile in relative direction: <code className="text-[#9c3526] bg-[#eae3ce]/50 px-1 font-mono">"front"</code>, <code className="text-[#9c3526] bg-[#eae3ce]/50 px-1 font-mono">"back"</code>, <code className="text-[#9c3526] bg-[#eae3ce]/50 px-1 font-mono">"left"</code>, or <code className="text-[#9c3526] bg-[#eae3ce]/50 px-1 font-mono">"right"</code> based on its current heading. Returns <code className="font-bold">True</code> on success, aborts on obstacle impact.
-              </p>
-            </div>
-
-            <div className="border-b border-[#eae3ce] pb-3">
-              <h4 className="font-mono font-bold text-[#9c3526] text-[13px] flex items-center justify-between">
-                <span>rotate(direction)</span>
-                <span className="text-[10px] text-[#5c5341] uppercase font-semibold font-sans">Orientation</span>
-              </h4>
-              <p className="text-[#5c5341] mt-1 leading-relaxed">
-                Turns the robot 90 degrees in the specified direction: <code className="text-[#9c3526] bg-[#eae3ce]/50 px-1 font-mono">"left"</code> (counter-clockwise) or <code className="text-[#9c3526] bg-[#eae3ce]/50 px-1 font-mono">"right"</code> (clockwise).
-              </p>
-            </div>
-
-            <div className="border-b border-[#eae3ce] pb-3">
-              <h4 className="font-mono font-bold text-[#9c3526] text-[13px] flex items-center justify-between">
-                <span>grab()</span>
-                <span className="text-[10px] text-[#5c5341] uppercase font-semibold font-sans">Actuator</span>
-              </h4>
-              <p className="text-[#5c5341] mt-1 leading-relaxed">
-                Clamps claws on the box. Unit must be on an adjacent tile and correctly facing the amber container cargo.
-              </p>
-            </div>
-
-            <div className="border-b border-[#eae3ce] pb-3">
-              <h4 className="font-mono font-bold text-[#9c3526] text-[13px] flex items-center justify-between">
-                <span>drop()</span>
-                <span className="text-[10px] text-[#5c5341] uppercase font-semibold font-sans">Actuator</span>
-              </h4>
-              <p className="text-[#5c5341] mt-1 leading-relaxed">
-                Releases the held box onto current coordinate. Success checks are run instantly if dropped on target node.
-              </p>
-            </div>
-
-            <div className="border-b border-[#eae3ce] pb-3">
-              <h4 className="font-mono font-bold text-[#9c3526] text-[13px]">is_holding()</h4>
-              <p className="text-[#5c5341] mt-1 leading-relaxed">
-                Verifies clamp status. Returns <code className="font-bold">True</code> if holding container, <code className="font-bold">False</code> otherwise.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="font-mono font-bold text-[#9c3526] text-[13px]">can_move(direction)</h4>
-              <p className="text-[#5c5341] mt-1 leading-relaxed">
-                Probes safety status for next relative move (<code className="text-[#9c3526] bg-[#eae3ce]/50 px-1 font-mono">"front"</code>, <code className="text-[#9c3526] bg-[#eae3ce]/50 px-1 font-mono">"back"</code>, <code className="text-[#9c3526] bg-[#eae3ce]/50 px-1 font-mono">"left"</code>, or <code className="text-[#9c3526] bg-[#eae3ce]/50 px-1 font-mono">"right"</code>). Returns <code className="font-bold">True</code> if trajectory is free, <code className="font-bold">False</code> if walls/obstacles prevent entry.
-              </p>
-            </div>
+            {COMMANDS.map((cmd) => {
+              const unlocked = isUnlocked(cmd.id);
+              return (
+                <div 
+                  key={cmd.id} 
+                  className={`border-b border-[#eae3ce] pb-3 last:border-b-0 last:pb-0 ${
+                    unlocked ? '' : 'opacity-60'
+                  }`}
+                >
+                  <h4 className="font-mono font-bold text-[#9c3526] text-[13px] flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      {!unlocked && <Lock className="w-3.5 h-3.5 text-[#8a7e6b]" />}
+                      <span className={unlocked ? '' : 'text-[#8a7e6b]'}>{cmd.signature}</span>
+                    </span>
+                    <span className="text-[10px] text-[#5c5341] uppercase font-semibold font-sans">
+                      {getCategoryLabel(cmd.id, cmd.category)}
+                    </span>
+                  </h4>
+                  {unlocked ? (
+                    <p className="text-[#5c5341] mt-1 leading-relaxed">
+                      {formatDocText(cmd.docMarkdown)}
+                    </p>
+                  ) : (
+                    <p className="text-[#8a7e6b] mt-1 leading-relaxed italic">
+                      Solve training modules to unlock documentation and usage.
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

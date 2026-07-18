@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getCommandIdsFromNodes, getNodesUnlockedByPuzzle } from '../progression/tree';
+
 export interface SavedSolution {
   code: string;
   timestamp: number;
@@ -22,7 +24,7 @@ const CURRENT_SCHEMA_VERSION = 1;
 function createDefaultSaveData(): SaveData {
   return {
     schemaVersion: CURRENT_SCHEMA_VERSION,
-    unlockedNodeIds: [],
+    unlockedNodeIds: ['basics'],
     solvedPuzzleIds: [],
     solutions: {}
   };
@@ -58,8 +60,22 @@ export function writeSaveData(data: SaveData): void {
 
 export function markPuzzleSolved(puzzleId: string): void {
   const data = loadSaveData();
+  let updated = false;
   if (!data.solvedPuzzleIds.includes(puzzleId)) {
     data.solvedPuzzleIds.push(puzzleId);
+    updated = true;
+  }
+  
+  // Unlock nodes associated with this puzzle
+  const newlyUnlocked = getNodesUnlockedByPuzzle(puzzleId);
+  for (const node of newlyUnlocked) {
+    if (!data.unlockedNodeIds.includes(node.id)) {
+      data.unlockedNodeIds.push(node.id);
+      updated = true;
+    }
+  }
+
+  if (updated) {
     writeSaveData(data);
   }
 }
@@ -67,4 +83,25 @@ export function markPuzzleSolved(puzzleId: string): void {
 export function isPuzzleSolved(puzzleId: string): boolean {
   const data = loadSaveData();
   return data.solvedPuzzleIds.includes(puzzleId);
+}
+
+export function unlockNode(nodeId: string): void {
+  const data = loadSaveData();
+  if (!data.unlockedNodeIds.includes(nodeId)) {
+    data.unlockedNodeIds.push(nodeId);
+    writeSaveData(data);
+  }
+}
+
+/**
+ * Resolve all unlocked tree nodes into a flat list of command IDs.
+ */
+export function getUnlockedCommandIds(): string[] {
+  const data = loadSaveData();
+  return getCommandIdsFromNodes(data.unlockedNodeIds);
+}
+
+export function getUnlockedNodeIds(): string[] {
+  const data = loadSaveData();
+  return data.unlockedNodeIds;
 }

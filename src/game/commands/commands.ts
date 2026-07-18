@@ -181,7 +181,7 @@ export class MoveError extends Error {
 
 // ── Registry ────────────────────────────────────────────────────────────────
 
-const COMMANDS: CommandDefinition[] = [
+export const COMMANDS: CommandDefinition[] = [
   {
     id: 'move',
     label: 'move',
