@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useRobotSimulation } from './hooks/useRobotSimulation';
+import { PUZZLE_001_FIRST_DELIVERY } from './puzzles/001-first-delivery';
+import { buildCommandRegistry, ALL_COMMAND_IDS } from './game/commands/commands';
 import { Header } from './components/Header';
 import { Ticker } from './components/Ticker';
 import { CodeEditor } from './components/CodeEditor';
@@ -17,6 +19,9 @@ import { ObjectiveCard } from './components/ObjectiveCard';
 import { Footer } from './components/Footer';
 
 export default function App() {
+  // All commands unlocked until progression system exists (M2)
+  const commandRegistry = useMemo(() => buildCommandRegistry(ALL_COMMAND_IDS), []);
+
   const {
     code,
     setCode,
@@ -36,7 +41,7 @@ export default function App() {
     resetSimulation,
     loadSolutionPreset,
     loadBlankTemplate
-  } = useRobotSimulation();
+  } = useRobotSimulation(PUZZLE_001_FIRST_DELIVERY, commandRegistry);
 
   return (
     <div id="game-container" className="min-h-screen bg-[#dfd3b6] text-[#2e2a22] font-sans antialiased selection:bg-[#9c3526]/20 selection:text-[#2e2a22] pb-12">

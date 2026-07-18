@@ -60,7 +60,7 @@ metrics (instruction count, steps, lines of code), competing against themselves 
 ## Milestone Roadmap
 
 ### Milestone 0 — Foundation Refactor (Command Registry + Puzzle Definition)
-**Status:** ☐ Not started
+**Status:** ☑ Done
 
 **Why this is first:** every later milestone (progression, editor, playground, solution
 tracking) depends on commands and puzzles being data-driven instead of hardcoded. Doing

@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type { CommandDefinition } from './types/gameTypes';
+import { MoveError } from './game/commands/commands';
+
 export interface RobotState {
   x: number;
   y: number;
@@ -329,9 +332,11 @@ export class PythonExecutor {
   private currentId = 0;
   private maxInstructions = 1000;
   private instructionCount = 0;
+  private commandRegistry: Map<string, CommandDefinition>;
 
-  constructor(initialState: GameWorldState) {
+  constructor(initialState: GameWorldState, commandRegistry: Map<string, CommandDefinition>) {
     this.state = cloneState(initialState);
+    this.commandRegistry = commandRegistry;
   }
 
   private addAction(
@@ -387,7 +392,7 @@ export class PythonExecutor {
     const canMoveMatch = trimmed.match(/^can_move\s*\(\s*(['"])(.+?)\1\s*\)$/);
     if (canMoveMatch) {
       const direction = canMoveMatch[2];
-      return this.canMoveDirection(direction);
+      return this.canMoveInDirection(direction);
     }
 
     // evaluate numeric/variable expressions or equalities
@@ -409,59 +414,34 @@ export class PythonExecutor {
     throw new Error(`RuntimeError: Condition "${exprStr}" is not recognized.`);
   }
 
-  private getAbsoluteDirection(relativeDir: string): 'up' | 'down' | 'left' | 'right' {
+  /**
+   * Inline can_move check for evalCondition. Stays here because it's a
+   * condition-evaluator builtin, not a callable command.
+   */
+  private canMoveInDirection(relativeDir: string): boolean {
     const headings: ('up' | 'right' | 'down' | 'left')[] = ['up', 'right', 'down', 'left'];
-    const currentHeading = this.state.robot.facing;
-    const idx = headings.indexOf(currentHeading);
-    if (idx === -1) {
-      throw new Error(`RuntimeError: Invalid robot facing orientation: ${currentHeading}`);
-    }
+    const idx = headings.indexOf(this.state.robot.facing);
+    if (idx === -1) return false;
 
     let targetIdx = idx;
-    if (relativeDir === 'front') {
-      targetIdx = idx;
-    } else if (relativeDir === 'right') {
-      targetIdx = (idx + 1) % 4;
-    } else if (relativeDir === 'back') {
-      targetIdx = (idx + 2) % 4;
-    } else if (relativeDir === 'left') {
-      targetIdx = (idx + 3) % 4;
-    } else {
-      throw new Error(`ValueError: Invalid relative direction "${relativeDir}". Must be "front", "back", "left", or "right".`);
-    }
+    if (relativeDir === 'front') targetIdx = idx;
+    else if (relativeDir === 'right') targetIdx = (idx + 1) % 4;
+    else if (relativeDir === 'back') targetIdx = (idx + 2) % 4;
+    else if (relativeDir === 'left') targetIdx = (idx + 3) % 4;
+    else return false;
 
-    return headings[targetIdx];
-  }
-
-  private canMoveDirection(relativeDir: string): boolean {
-    let absoluteDir: 'up' | 'down' | 'left' | 'right';
-    try {
-      absoluteDir = this.getAbsoluteDirection(relativeDir);
-    } catch {
-      return false;
-    }
-
-    let dx = 0;
-    let dy = 0;
-    if (absoluteDir === 'up') dy = -1;
-    else if (absoluteDir === 'down') dy = 1;
-    else if (absoluteDir === 'left') dx = -1;
-    else if (absoluteDir === 'right') dx = 1;
+    const absDir = headings[targetIdx];
+    let dx = 0, dy = 0;
+    if (absDir === 'up') dy = -1;
+    else if (absDir === 'down') dy = 1;
+    else if (absDir === 'left') dx = -1;
+    else if (absDir === 'right') dx = 1;
 
     const nx = this.state.robot.x + dx;
     const ny = this.state.robot.y + dy;
 
-    // Grid boundary check
-    if (nx < 0 || nx >= this.state.gridSize.width || ny < 0 || ny >= this.state.gridSize.height) {
-      return false;
-    }
-
-    // Obstacle check
-    const hitObstacle = this.state.obstacles.some(o => o.x === nx && o.y === ny);
-    if (hitObstacle) {
-      return false;
-    }
-
+    if (nx < 0 || nx >= this.state.gridSize.width || ny < 0 || ny >= this.state.gridSize.height) return false;
+    if (this.state.obstacles.some(o => o.x === nx && o.y === ny)) return false;
     return true;
   }
 
@@ -575,192 +555,43 @@ export class PythonExecutor {
   private executeCommand(name: string, rawArgs: any[], line: number, beforeState: GameWorldState) {
     const args = rawArgs.map(arg => this.evalExpression(arg));
 
-    if (name === 'move') {
-      const relativeDir = args[0];
-      if (relativeDir !== 'front' && relativeDir !== 'back' && relativeDir !== 'left' && relativeDir !== 'right') {
-        throw new Error(`ValueError: move() requires one of "front", "back", "left", "right". Got: ${JSON.stringify(relativeDir)}`);
-      }
+    const cmdDef = this.commandRegistry.get(name);
+    if (!cmdDef) {
+      throw new Error(`NameError: Command name "${name}" is not defined on the Robot API.`);
+    }
 
-      const absoluteDir = this.getAbsoluteDirection(relativeDir);
-
-      let dx = 0;
-      let dy = 0;
-      if (absoluteDir === 'up') dy = -1;
-      else if (absoluteDir === 'down') dy = 1;
-      else if (absoluteDir === 'left') dx = -1;
-      else if (absoluteDir === 'right') dx = 1;
-
-      const nx = this.state.robot.x + dx;
-      const ny = this.state.robot.y + dy;
-
-      // Obstacle collision checking
-      const hitObstacle = this.state.obstacles.some(o => o.x === nx && o.y === ny);
-      if (hitObstacle) {
-        this.addAction(
-          line,
-          'move',
-          [relativeDir],
-          false,
-          `Collision! The robot crashed into an obstacle at grid coordinate (${nx}, ${ny}).`,
-          beforeState,
-          cloneState(this.state)
-        );
-        throw new Error(`CollisionError: Crashed into obstacle at (${nx}, ${ny}).`);
-      }
-
-      // Border bounds checking
-      if (nx < 0 || nx >= this.state.gridSize.width || ny < 0 || ny >= this.state.gridSize.height) {
-        this.addAction(
-          line,
-          'move',
-          [relativeDir],
-          false,
-          `Boundary Collision! The robot attempted to walk off the grid at coordinate (${nx}, ${ny}).`,
-          beforeState,
-          cloneState(this.state)
-        );
-        throw new Error(`BoundaryError: Robot fell off the grid boundary at (${nx}, ${ny}).`);
-      }
-
-      this.state.robot.x = nx;
-      this.state.robot.y = ny;
-
-      // If robot is holding the box, move the box with the robot
-      if (this.state.robot.holding) {
-        this.state.box.x = nx;
-        this.state.box.y = ny;
-      }
-
+    try {
+      const result = cmdDef.execute(this.state, args);
+      const actionType = (name === 'move' || name === 'rotate' || name === 'grab' || name === 'drop')
+        ? name as VMAction['type']
+        : 'pass';
       this.addAction(
         line,
-        'move',
-        [relativeDir],
-        true,
-        `Robot successfully moved ${relativeDir} to (${nx}, ${ny}).`,
+        actionType,
+        args,
+        result.success,
+        result.message,
         beforeState,
         cloneState(this.state)
       );
-      return;
-    }
-
-    if (name === 'rotate') {
-      const direction = args[0];
-      if (direction !== 'left' && direction !== 'right') {
-        throw new Error(`ValueError: rotate() requires either "left" or "right". Got: ${JSON.stringify(direction)}`);
-      }
-
-      const headings: ('up' | 'right' | 'down' | 'left')[] = ['up', 'right', 'down', 'left'];
-      const currentHeading = this.state.robot.facing;
-      const idx = headings.indexOf(currentHeading);
-      if (idx === -1) {
-        throw new Error(`RuntimeError: Invalid robot facing orientation: ${currentHeading}`);
-      }
-
-      let nextIdx = idx;
-      if (direction === 'right') {
-        nextIdx = (idx + 1) % 4;
-      } else {
-        nextIdx = (idx + 3) % 4;
-      }
-      const newHeading = headings[nextIdx];
-      this.state.robot.facing = newHeading;
-
-      this.addAction(
-        line,
-        'rotate',
-        [direction],
-        true,
-        `Robot successfully rotated ${direction} to face ${newHeading}.`,
-        beforeState,
-        cloneState(this.state)
-      );
-      return;
-    }
-
-    if (name === 'grab') {
-      if (this.state.robot.holding) {
-        throw new Error(`RuntimeError: Robot is already holding the box! Can only hold one item.`);
-      }
-
-      let facedX = this.state.robot.x;
-      let facedY = this.state.robot.y;
-      if (this.state.robot.facing === 'up') facedY -= 1;
-      else if (this.state.robot.facing === 'down') facedY += 1;
-      else if (this.state.robot.facing === 'left') facedX -= 1;
-      else if (this.state.robot.facing === 'right') facedX += 1;
-
-      const isFacingBox = facedX === this.state.box.x && facedY === this.state.box.y;
-
-      if (!isFacingBox) {
-        const isWithBox = this.state.robot.x === this.state.box.x && this.state.robot.y === this.state.box.y;
-        let errMsg = `Grab failed! The robot is not facing the cargo box at (${this.state.box.x}, ${this.state.box.y}).`;
-        if (isWithBox) {
-          errMsg = `Grab failed! The robot is standing directly on the cargo box. Step back and face it to grab it.`;
-        } else {
-          const isAdjacent = Math.abs(this.state.robot.x - this.state.box.x) + Math.abs(this.state.robot.y - this.state.box.y) === 1;
-          if (isAdjacent) {
-            errMsg = `Grab failed! The robot is adjacent to the box but facing ${this.state.robot.facing} instead of facing the box.`;
-          }
-        }
-
+    } catch (err: any) {
+      if (err instanceof MoveError) {
+        // MoveError carries a user-facing display message for the action
+        // and a thrown message for the error action
+        const actionType = (name === 'move' || name === 'rotate' || name === 'grab' || name === 'drop')
+          ? name as VMAction['type']
+          : 'pass';
         this.addAction(
           line,
-          'grab',
-          [],
+          actionType,
+          args,
           false,
-          errMsg,
+          err.displayMessage,
           beforeState,
           cloneState(this.state)
         );
-        throw new Error(`GrabError: Robot is not correctly facing the box to grab it.`);
       }
-
-      this.state.robot.holding = true;
-      this.state.box.x = this.state.robot.x;
-      this.state.box.y = this.state.robot.y;
-
-      this.addAction(
-        line,
-        'grab',
-        [],
-        true,
-        `Grab successful! The robot is now holding the box.`,
-        beforeState,
-        cloneState(this.state)
-      );
-      return;
+      throw err;
     }
-
-    if (name === 'drop') {
-      if (!this.state.robot.holding) {
-        this.addAction(
-          line,
-          'drop',
-          [],
-          false,
-          `Drop failed! The robot is not holding anything to drop.`,
-          beforeState,
-          cloneState(this.state)
-        );
-        throw new Error(`DropError: Robot is not holding the box.`);
-      }
-
-      this.state.robot.holding = false;
-      this.state.box.x = this.state.robot.x;
-      this.state.box.y = this.state.robot.y;
-
-      this.addAction(
-        line,
-        'drop',
-        [],
-        true,
-        `Drop successful! The robot dropped the box at (${this.state.robot.x}, ${this.state.robot.y}).`,
-        beforeState,
-        cloneState(this.state)
-      );
-      return;
-    }
-
-    throw new Error(`NameError: Command name "${name}" is not defined on the Robot API.`);
   }
 }

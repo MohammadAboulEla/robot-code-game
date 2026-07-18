@@ -6,7 +6,6 @@
 import React, { useState } from 'react';
 import { Layers, CheckCircle2, XCircle } from 'lucide-react';
 import { GameWorldState } from '../robotInterpreter';
-import { INITIAL_WORLD_STATE } from '../constants/gameConstants';
 import { tileW, tileH, getIsoCoords, getTilePoints } from '../utils/isometricHelpers';
 
 interface IsometricVisualEngineProps {
@@ -57,10 +56,10 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
 
           {/* 1. Ground Level Render Grid */}
           <g id="iso-ground">
-            {Array.from({ length: INITIAL_WORLD_STATE.gridSize.height }).map((_, y) => 
-              Array.from({ length: INITIAL_WORLD_STATE.gridSize.width }).map((_, x) => {
+            {Array.from({ length: worldState.gridSize.height }).map((_, y) => 
+              Array.from({ length: worldState.gridSize.width }).map((_, x) => {
                 const isHovered = hoveredTile?.x === x && hoveredTile?.y === y;
-                const isTarget = INITIAL_WORLD_STATE.target.x === x && INITIAL_WORLD_STATE.target.y === y;
+                const isTarget = worldState.target.x === x && worldState.target.y === y;
                 
                 // Retro warm sandstone tiles
                 let fill = '#eae3ce'; // primary tile sand
@@ -124,7 +123,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
 
           {/* 2. Obstacles rendering (z-sorted by coordinate sum to avoid overlaps) */}
           <g id="iso-obstacles" pointerEvents="none">
-            {[...INITIAL_WORLD_STATE.obstacles]
+            {[...worldState.obstacles]
               .sort((a, b) => (a.x + a.y) - (b.x + b.y))
               .map((obs) => {
                 const { x: sx, y: sy } = getIsoCoords(obs.x, obs.y);

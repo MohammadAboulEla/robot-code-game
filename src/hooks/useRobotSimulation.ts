@@ -4,12 +4,33 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { INITIAL_WORLD_STATE, DEFAULT_PYTHON_CODE } from '../constants/gameConstants';
+import type { PuzzleDefinition, CommandDefinition } from '../types/gameTypes';
 import { parsePython, PythonExecutor, cloneState, GameWorldState, VMAction } from '../robotInterpreter';
 
-export function useRobotSimulation() {
-  const [code, setCode] = useState(DEFAULT_PYTHON_CODE);
-  const [worldState, setWorldState] = useState<GameWorldState>(cloneState(INITIAL_WORLD_STATE));
+/**
+ * Derives a GameWorldState from a PuzzleDefinition.
+ * Uses the first cargo/target entry (single-box puzzle model).
+ */
+function puzzleToWorldState(puzzle: PuzzleDefinition): GameWorldState {
+  return {
+    robot: {
+      x: puzzle.robotStart.x,
+      y: puzzle.robotStart.y,
+      holding: false,
+      facing: puzzle.robotStart.facing
+    },
+    box: { x: puzzle.cargo[0].x, y: puzzle.cargo[0].y },
+    target: { x: puzzle.targets[0].x, y: puzzle.targets[0].y },
+    gridSize: { ...puzzle.gridSize },
+    obstacles: puzzle.obstacles.map(o => ({ ...o }))
+  };
+}
+
+export function useRobotSimulation(puzzle: PuzzleDefinition, commandRegistry: Map<string, CommandDefinition>) {
+  const initialWorld = puzzleToWorldState(puzzle);
+
+  const [code, setCode] = useState(puzzle.starterCode);
+  const [worldState, setWorldState] = useState<GameWorldState>(cloneState(initialWorld));
   
   // Execution state
   const [actionQueue, setActionQueue] = useState<VMAction[]>([]);
@@ -70,7 +91,7 @@ export function useRobotSimulation() {
     
     try {
       const ast = parsePython(code);
-      const executor = new PythonExecutor(INITIAL_WORLD_STATE);
+      const executor = new PythonExecutor(initialWorld, commandRegistry);
       const actions = executor.run(ast);
       
       if (actions.length === 0) {
@@ -97,7 +118,7 @@ export function useRobotSimulation() {
     if (actionQueue.length === 0) {
       try {
         const ast = parsePython(code);
-        const executor = new PythonExecutor(INITIAL_WORLD_STATE);
+        const executor = new PythonExecutor(initialWorld, commandRegistry);
         const actions = executor.run(ast);
         if (actions.length === 0) {
           throw new Error('No instructions generated.');
@@ -168,7 +189,7 @@ export function useRobotSimulation() {
     setExecutingLine(null);
     setErrorMessage(null);
     setIsSuccess(false);
-    setWorldState(cloneState(INITIAL_WORLD_STATE));
+    setWorldState(cloneState(initialWorld));
   };
 
   const resetSimulation = () => {
@@ -178,16 +199,16 @@ export function useRobotSimulation() {
 
   // Helper to load simple presets
   const loadSolutionPreset = () => {
-    setCode(DEFAULT_PYTHON_CODE);
+    setCode(puzzle.starterCode);
     resetSimulationStateOnly();
     setConsoleLogs(['Loaded default protocol solution template.']);
   };
 
   const loadBlankTemplate = () => {
     setCode(`# Start from scratch!
-# Robot starts at (0, 0)
-# Cargo box is at (1, 3)
-# Target pad is at (3, 1)
+# Robot starts at (${puzzle.robotStart.x}, ${puzzle.robotStart.y})
+# Cargo box is at (${puzzle.cargo[0].x}, ${puzzle.cargo[0].y})
+# Target pad is at (${puzzle.targets[0].x}, ${puzzle.targets[0].y})
 
 `);
     resetSimulationStateOnly();
