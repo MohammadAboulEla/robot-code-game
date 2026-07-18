@@ -17,19 +17,19 @@ export type RobotExpression =
   | 'angry';
 
 /**
- * Sprite sheet is a 3×3 grid in assets/sprite.jpeg.
+ * Sprite sheet is a 3×3 grid in assets/sprite.png.
  * Each cell maps to a row/col coordinate for CSS background-position.
  */
 export const EXPRESSION_SPRITE_MAP: Record<RobotExpression, { row: number; col: number }> = {
-  'happy':       { row: 0, col: 0 },
-  'idle':        { row: 0, col: 1 },
-  'excited':     { row: 0, col: 2 },
-  'confused':    { row: 1, col: 0 },
-  'talking':     { row: 1, col: 1 },
-  'sad':         { row: 1, col: 2 },
-  'crossed-arms':{ row: 2, col: 0 },
-  'pointing':    { row: 2, col: 1 },
-  'angry':       { row: 2, col: 2 },
+  'happy': { row: 0, col: 0 },
+  'idle': { row: 0, col: 1 },
+  'excited': { row: 0, col: 2 },
+  'confused': { row: 1, col: 0 },
+  'talking': { row: 1, col: 1 },
+  'sad': { row: 1, col: 2 },
+  'crossed-arms': { row: 2, col: 0 },
+  'pointing': { row: 2, col: 1 },
+  'angry': { row: 2, col: 2 },
 };
 
 // ── Dialogue Data Schema ────────────────────────────────────────────────────
