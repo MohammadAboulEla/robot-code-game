@@ -39,7 +39,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
             className="bg-[#9c3526] hover:bg-[#822c20] text-[#faf8f2] font-bold text-[10px] py-1 px-2.5 border border-[#3e382d] cursor-pointer flex items-center gap-1 uppercase tracking-wider transition-colors"
           >
             <Play className="w-3 h-3 fill-current" />
-            <span>Run</span>
+            <span>Run Program</span>
           </button>
         ) : (
           <button
@@ -57,7 +57,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           className="disabled:opacity-40 disabled:cursor-not-allowed bg-[#faf8f2] hover:bg-[#eae3ce] text-[#2e2a22] font-bold text-[10px] py-1 px-2.5 border border-[#3e382d] cursor-pointer flex items-center gap-1 uppercase tracking-wider transition-colors"
         >
           <ChevronRight className="w-3.5 h-3.5" />
-          <span>Step</span>
+          <span>Step Debug</span>
         </button>
 
         <button
