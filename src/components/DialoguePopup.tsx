@@ -44,22 +44,22 @@ export const DialoguePopup: React.FC<DialoguePopupProps> = ({ script, onComplete
     <div className="fixed inset-x-0 bottom-0 z-[100] pointer-events-none animate-fade-in">
       <div className="pointer-events-auto flex items-end max-w-3xl mx-auto px-4 pb-6">
 
-        {/* Robot portrait — large, overlapping the box */}
-        <div className="relative z-10 shrink-0 -mr-2 mb-0" style={{ width: '180px' }}>
+        {/* Robot portrait — large, overlapping the dialogue box */}
+        <div className="relative z-10 shrink-0 -mr-12 mb-0" style={{ width: '210px' }}>
           <div
-            className="w-[170px] h-[170px]"
+            className="w-[250px] h-[250px]"
             style={{
               backgroundImage: `url(${spriteSheet})`,
               backgroundSize: '300% 300%',
               backgroundPosition: `${bgPosX}% ${bgPosY}%`,
               imageRendering: 'auto',
-              filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))',
+              filter: 'drop-shadow(0 6px 16px rgba(0,0,0,0.45))',
             }}
           />
         </div>
 
         {/* Dialogue box */}
-        <div className="flex-1 min-w-0 -ml-4 mb-0 animate-bubble">
+        <div className="flex-1 min-w-0 mb-0 animate-bubble">
           {/* Name plate tab */}
           <div
             className="inline-block px-5 py-1.5 ml-8 relative"
@@ -87,7 +87,7 @@ export const DialoguePopup: React.FC<DialoguePopupProps> = ({ script, onComplete
               boxShadow: '0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.5)',
             }}
           >
-            <div className="px-5 pt-4 pb-3">
+            <div className="pl-16 pr-5 pt-4 pb-3">
               <p className="text-[13px] text-[#2e2a22] leading-[1.7] font-mono font-bold uppercase"
                 style={{ letterSpacing: '0.03em' }}
               >
