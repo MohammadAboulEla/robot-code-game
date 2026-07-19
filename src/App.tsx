@@ -14,6 +14,7 @@ import { PuzzleSelect } from './components/PuzzleSelect';
 import { GameView } from './components/GameView';
 import { DialoguePopup } from './components/DialoguePopup';
 import { useDialogue } from './hooks/useDialogue';
+import { ConfirmModal } from './components/ConfirmModal';
 
 export default function App() {
   const [selectedPuzzle, setSelectedPuzzle] = useState<PuzzleDefinition | null>(null);
@@ -27,6 +28,9 @@ export default function App() {
   const [isPlaygroundMode, setIsPlaygroundMode] = useState(false);
   const [playgroundPuzzle, setPlaygroundPuzzle] = useState<PuzzleDefinition | null>(null);
   const [playgroundReloadCounter, setPlaygroundReloadCounter] = useState(0);
+
+  // Reset confirmation state
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   // Detect dev mode (query parameter ?dev=1 or running in development mode)
   const isDevUrlParam = useMemo(() => {
@@ -146,10 +150,7 @@ export default function App() {
   }, []);
 
   const handleResetProgress = useCallback(() => {
-    if (window.confirm("Are you sure you want to reset all progress, saved solutions, and achievements? This will refresh the page.")) {
-      resetSaveData();
-      window.location.reload();
-    }
+    setIsResetConfirmOpen(true);
   }, []);
 
   return (
@@ -208,6 +209,20 @@ export default function App() {
       {activeScript && (
         <DialoguePopup script={activeScript} onComplete={handleDialogueComplete} />
       )}
+
+      {/* Reset progress confirm modal */}
+      <ConfirmModal
+        isOpen={isResetConfirmOpen}
+        title="Reset Game Data"
+        message="Are you sure you want to reset all progress, saved solutions, and achievements? This will refresh the page."
+        confirmText="Reset"
+        cancelText="Abort"
+        onConfirm={() => {
+          resetSaveData();
+          window.location.reload();
+        }}
+        onCancel={() => setIsResetConfirmOpen(false)}
+      />
 
     </div>
   );
