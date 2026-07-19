@@ -41,14 +41,21 @@ export const DialoguePopup: React.FC<DialoguePopupProps> = ({ script, onComplete
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[100] pointer-events-none animate-fade-in">
-      <div className="pointer-events-auto flex items-end max-w-3xl mx-auto px-4 pb-6">
+    <div 
+      className="fixed inset-0 z-[100] flex flex-col justify-end items-center pb-6 bg-black/45 animate-fade-in"
+      style={{ pointerEvents: 'auto' }}
+    >
+      {/* Wrapper: relative so portrait can overlap the left edge */}
+      <div className="relative" style={{ width: '680px' }}>
 
-        {/* Robot portrait — large, overlapping the dialogue box */}
-        <div className="relative z-10 shrink-0 -mr-12 mb-0" style={{ width: '210px' }}>
+          {/* Robot portrait — absolutely positioned, overlapping left edge */}
           <div
-            className="w-[250px] h-[250px]"
+            className="absolute z-10"
             style={{
+              width: '350px',
+              height: '350px',
+              left: '-150px',
+              bottom: '-50px',
               backgroundImage: `url(${spriteSheet})`,
               backgroundSize: '300% 300%',
               backgroundPosition: `${bgPosX}% ${bgPosY}%`,
@@ -56,38 +63,41 @@ export const DialoguePopup: React.FC<DialoguePopupProps> = ({ script, onComplete
               filter: 'drop-shadow(0 6px 16px rgba(0,0,0,0.45))',
             }}
           />
-        </div>
 
-        {/* Dialogue box */}
-        <div className="flex-1 min-w-0 mb-0 animate-bubble">
-          {/* Name plate tab */}
-          <div
-            className="inline-block px-5 py-1.5 ml-8 relative"
-            style={{
-              backgroundColor: '#3e382d',
-              borderRadius: '6px 6px 0 0',
-              borderTop: '2px solid #2e2a22',
-              borderLeft: '2px solid #2e2a22',
-              borderRight: '2px solid #2e2a22',
-              bottom: '-2px',
-              position: 'relative',
-            }}
-          >
-            <span className="text-[11px] font-mono font-bold tracking-[0.15em] text-[#faf8f2] uppercase">
-              {line.speaker}
-            </span>
+          {/* Name plate tab — centered above the box */}
+          <div className="flex justify-center mb-[-2px] relative z-0">
+            <div
+              className="px-6 py-1.5"
+              style={{
+                backgroundColor: '#3e382d',
+                borderRadius: '6px 6px 0 0',
+                borderTop: '2px solid #2e2a22',
+                borderLeft: '2px solid #2e2a22',
+                borderRight: '2px solid #2e2a22',
+              }}
+            >
+              <span className="text-[11px] font-mono font-bold tracking-[0.15em] text-[#faf8f2] uppercase">
+                {line.speaker}
+              </span>
+            </div>
           </div>
 
-          {/* Text body */}
+          {/* Dialogue box — fixed dimensions */}
           <div
+            className="animate-bubble"
             style={{
+              width: '680px',
+              height: '180px',
               backgroundColor: '#f4efe1',
               border: '2px solid #2e2a22',
-              borderRadius: '0 8px 8px 8px',
+              borderRadius: '8px',
               boxShadow: '0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.5)',
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
-            <div className="pl-16 pr-5 pt-4 pb-3">
+            {/* Text content — left padding clears the portrait */}
+            <div className="flex-1 overflow-y-auto" style={{ paddingLeft: '130px', paddingRight: '20px', paddingTop: '16px', paddingBottom: '8px' }}>
               <p className="text-[13px] text-[#2e2a22] leading-[1.7] font-mono font-bold uppercase"
                 style={{ letterSpacing: '0.03em' }}
               >
@@ -96,33 +106,23 @@ export const DialoguePopup: React.FC<DialoguePopupProps> = ({ script, onComplete
             </div>
 
             {/* Button row */}
-            <div className="flex justify-end gap-2 px-5 pb-4">
+            <div className="flex justify-end gap-2 px-5 pb-4 shrink-0">
               {!isLastLine && (
-                <button
-                  onClick={handleNext}
-                  className="dialogue-btn"
-                >
+                <button onClick={handleNext} className="dialogue-btn">
                   Next
                 </button>
               )}
               {!isLastLine && (
-                <button
-                  onClick={handleSkip}
-                  className="dialogue-btn"
-                >
+                <button onClick={handleSkip} className="dialogue-btn">
                   Skip
                 </button>
               )}
-              <button
-                onClick={onComplete}
-                className="dialogue-btn"
-              >
+              <button onClick={onComplete} className="dialogue-btn">
                 Close
               </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
