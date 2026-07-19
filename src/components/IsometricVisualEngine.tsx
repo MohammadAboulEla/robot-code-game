@@ -17,6 +17,8 @@ interface IsometricVisualEngineProps {
   hideWrapper?: boolean;
   onNextMission?: () => void;
   isPlaying?: boolean;
+  puzzleId?: string;
+  onReceiveCall?: () => void;
 }
 
 function getActionToastMessage(action: VMAction): string {
@@ -55,7 +57,9 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
   isDebugMode = false,
   hideWrapper = false,
   onNextMission,
-  isPlaying = false
+  isPlaying = false,
+  puzzleId,
+  onReceiveCall
 }) => {
   const [hoveredTile, setHoveredTile] = useState<{ x: number; y: number } | null>(null);
 
@@ -452,13 +456,25 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                 >
                   TINKER FURTHER
                 </button>
-                {onNextMission && (
+                {puzzleId === '000-say-hello' ? (
                   <button 
-                    onClick={onNextMission}
-                    className="flex-1 bg-[#9c3526] hover:bg-[#852a1e] text-[#faf8f2] font-bold text-xs py-2.5 px-4 border border-[#3e382d] transition cursor-pointer font-mono"
+                    onClick={() => {
+                      resetSimulation();
+                      onReceiveCall?.();
+                    }}
+                    className="flex-1 bg-[#9c3526] hover:bg-[#852a1e] text-[#faf8f2] font-bold text-xs py-2.5 px-4 border border-[#3e382d] transition cursor-pointer font-mono uppercase"
                   >
-                    NEXT MISSION
+                    RECEIVE A CALL
                   </button>
+                ) : (
+                  onNextMission && (
+                    <button 
+                      onClick={onNextMission}
+                      className="flex-1 bg-[#9c3526] hover:bg-[#852a1e] text-[#faf8f2] font-bold text-xs py-2.5 px-4 border border-[#3e382d] transition cursor-pointer font-mono"
+                    >
+                      NEXT MISSION
+                    </button>
+                  )
                 )}
               </div>
             </div>

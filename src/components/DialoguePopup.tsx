@@ -112,14 +112,24 @@ export const DialoguePopup: React.FC<DialoguePopupProps> = ({ script, onComplete
                   Next
                 </button>
               )}
+              {/* Temporarily disabled Skip button:
               {!isLastLine && (
                 <button onClick={handleSkip} className="dialogue-btn">
                   Skip
                 </button>
               )}
+              */}
+              {/* Close button only appears on the last line to prevent premature closing */}
+              {isLastLine && (
+                <button onClick={onComplete} className="dialogue-btn">
+                  Close
+                </button>
+              )}
+              {/* Original Close button (always visible):
               <button onClick={onComplete} className="dialogue-btn">
                 Close
               </button>
+              */}
             </div>
           </div>
         </div>

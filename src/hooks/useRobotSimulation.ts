@@ -140,23 +140,21 @@ export function useRobotSimulation(
       markPuzzleSolved(puzzle.id);
       onPuzzleSolved?.();
 
-      if (isDebug) {
-        // Capture achievements earned after saving
-        const afterEarned = getEarnedAchievements(loadSaveData());
-        const newlyUnlocked = afterEarned.filter(id => !beforeEarned.includes(id));
+      // Capture achievements earned after saving
+      const afterEarned = getEarnedAchievements(loadSaveData());
+      const newlyUnlocked = afterEarned.filter(id => !beforeEarned.includes(id));
 
-        if (newlyUnlocked.length > 0) {
-          playSynthSound('achievement');
-          const nextAch = ACHIEVEMENTS.find(a => a.id === newlyUnlocked[0]);
-          if (nextAch) {
-            setUnlockedAchievement(nextAch);
-            setTimeout(() => {
-              setUnlockedAchievement(null);
-            }, 4000);
-          }
-        } else {
-          playSynthSound('success');
+      if (newlyUnlocked.length > 0) {
+        playSynthSound('achievement');
+        const nextAch = ACHIEVEMENTS.find(a => a.id === newlyUnlocked[0]);
+        if (nextAch) {
+          setUnlockedAchievement(nextAch);
+          setTimeout(() => {
+            setUnlockedAchievement(null);
+          }, 4000);
         }
+      } else {
+        playSynthSound('success');
       }
     }
 

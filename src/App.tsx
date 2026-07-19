@@ -91,7 +91,7 @@ export default function App() {
 
   const handlePuzzleSolved = useCallback(() => {
     setSolvedCounter(c => c + 1);
-    if (activePuzzle) {
+    if (activePuzzle && activePuzzle.id !== '000-say-hello') {
       fireDialogueTrigger('puzzleSolved', { puzzleId: activePuzzle.id });
     }
   }, [activePuzzle, fireDialogueTrigger]);
@@ -114,6 +114,18 @@ export default function App() {
       setSelectedPuzzle(nextPuzzle);
     }
   }, [nextPuzzle, isPlaygroundMode]);
+
+  const handleDialogueComplete = useCallback(() => {
+    const wasOnboardingIntro = activeScript?.id === 'onboarding-intro';
+    dismissDialogue();
+    if (wasOnboardingIntro) {
+      handleNextMission();
+    }
+  }, [activeScript, dismissDialogue, handleNextMission]);
+
+  const handleReceiveCall = useCallback(() => {
+    fireDialogueTrigger('puzzleSolved', { puzzleId: '000-say-hello' });
+  }, [fireDialogueTrigger]);
 
   // Fire puzzleLoad dialogue trigger when a puzzle is selected
   useEffect(() => {
@@ -168,6 +180,7 @@ export default function App() {
             onBack={handleBackToPuzzles}
             isPlaygroundMode={isPlaygroundMode}
             onNextMission={nextPuzzle ? handleNextMission : undefined}
+            onReceiveCall={handleReceiveCall}
             // Playground specific props
             playgroundProps={
               isPlaygroundMode && playgroundPuzzle ? {
@@ -193,7 +206,7 @@ export default function App() {
 
       {/* Dialogue popup overlay */}
       {activeScript && (
-        <DialoguePopup script={activeScript} onComplete={dismissDialogue} />
+        <DialoguePopup script={activeScript} onComplete={handleDialogueComplete} />
       )}
 
     </div>

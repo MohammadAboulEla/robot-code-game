@@ -29,6 +29,7 @@ interface GameViewProps {
     onHotReload: (newPuzzle: PuzzleDefinition) => void;
   };
   onNextMission?: () => void;
+  onReceiveCall?: () => void;
 }
 
 export const GameView: React.FC<GameViewProps> = ({
@@ -39,7 +40,8 @@ export const GameView: React.FC<GameViewProps> = ({
   onBack,
   isPlaygroundMode = false,
   playgroundProps,
-  onNextMission
+  onNextMission,
+  onReceiveCall
 }) => {
   const {
     code,
@@ -144,6 +146,7 @@ export const GameView: React.FC<GameViewProps> = ({
               currentIndex={currentIndex}
               isDebugMode={isDebugMode}
               onNextMission={onNextMission}
+              onReceiveCall={onReceiveCall}
             />
           </div>
         </div>
@@ -205,6 +208,7 @@ export const GameView: React.FC<GameViewProps> = ({
               currentIndex={currentIndex}
               isDebugMode={isDebugMode}
               onNextMission={onNextMission}
+              onReceiveCall={onReceiveCall}
             />
           </div>
         </div>
