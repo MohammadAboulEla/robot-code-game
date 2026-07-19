@@ -119,7 +119,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
 
         {/* Robot State Overlay */}
         <div className="absolute top-3 left-3 flex flex-col items-center gap-1 z-10 w-[60px]">
-          <div className="bg-[#faf8f2]/95 border border-[#3e382d] p-1 shadow-sm select-none w-[60px] h-[60px] flex items-center justify-center">
+          <div className="bg-[#faf8f2]/95 border border-[#3e382d] p-1 select-none w-[60px] h-[60px] flex items-center justify-center overflow-hidden">
             <div
               className="w-full h-full select-none"
               style={{
@@ -127,6 +127,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                 backgroundSize: '300% 300%',
                 backgroundPosition: `${bgPosX}% ${bgPosY}%`,
                 imageRendering: 'pixelated',
+                transform: 'scale(1.45)',
               }}
               title={`R-07 Status: ${currentExpression.toUpperCase()}`}
             />
