@@ -246,21 +246,19 @@ function parseBlocks(lines: Line[], startIndex: number, parentIndent: number): [
     }
 
     // 4. Assignments
-    if (text.includes('=')) {
-      const parts = text.split('=');
-      if (parts.length === 2) {
-        const name = parts[0].trim();
-        const expr = parts[1].trim();
-        if (/^[a-zA-Z_]\w*$/.test(name)) {
-          statements.push({
-            type: 'assign',
-            name,
-            valueExpr: expr,
-            line: lineNum
-          });
-          i++;
-          continue;
-        }
+    const eqIdx = text.indexOf('=');
+    if (eqIdx !== -1 && text[eqIdx + 1] !== '=' && text[eqIdx - 1] !== '=' && text[eqIdx - 1] !== '!' && text[eqIdx - 1] !== '<' && text[eqIdx - 1] !== '>') {
+      const name = text.slice(0, eqIdx).trim();
+      const expr = text.slice(eqIdx + 1).trim();
+      if (/^[a-zA-Z_]\w*$/.test(name)) {
+        statements.push({
+          type: 'assign',
+          name,
+          valueExpr: expr,
+          line: lineNum
+        });
+        i++;
+        continue;
       }
     }
 
@@ -334,17 +332,21 @@ export class PythonExecutor {
   private maxInstructions = 1000;
   private instructionCount = 0;
   private commandRegistry: Map<string, CommandDefinition>;
-  private successCondition: 'cargo-delivery' | 'any-print' | 'robot-on-target';
+  private successCondition: 'cargo-delivery' | 'any-print' | 'robot-on-target' | 'print-exact';
   private hasPrinted = false;
+  private expectedOutput?: string;
+  private printedValues: string[] = [];
 
   constructor(
     initialState: GameWorldState,
     commandRegistry: Map<string, CommandDefinition>,
-    successCondition: 'cargo-delivery' | 'any-print' | 'robot-on-target' = 'cargo-delivery'
+    successCondition: 'cargo-delivery' | 'any-print' | 'robot-on-target' | 'print-exact' = 'cargo-delivery',
+    expectedOutput?: string
   ) {
     this.state = cloneState(initialState);
     this.commandRegistry = commandRegistry;
     this.successCondition = successCondition;
+    this.expectedOutput = expectedOutput;
   }
 
   private addAction(
@@ -372,11 +374,7 @@ export class PythonExecutor {
 
   private evalExpression(expr: any): any {
     if (expr && typeof expr === 'object' && 'identifier' in expr) {
-      const varName = expr.identifier;
-      if (!this.variables.has(varName)) {
-        throw new Error(`NameError: name "${varName}" is not defined.`);
-      }
-      return this.variables.get(varName);
+      return evaluateArithmetic(expr.identifier, this.variables);
     }
     return expr;
   }
@@ -467,6 +465,12 @@ export class PythonExecutor {
         winMessage = isWin 
           ? 'Success! You executed a print command and communicated with the robot!'
           : 'Failed. You need to print a message to succeed.';
+      } else if (this.successCondition === 'print-exact') {
+        const lastPrint = this.printedValues[this.printedValues.length - 1];
+        isWin = lastPrint === this.expectedOutput;
+        winMessage = isWin
+          ? `Success! Exact value matching confirmed: "${this.expectedOutput}" printed.`
+          : `Failed. Expected terminal output: "${this.expectedOutput}", got: "${lastPrint || ''}".`;
       } else if (this.successCondition === 'robot-on-target') {
         isWin = this.state.robot.x === this.state.target.x && this.state.robot.y === this.state.target.y;
         winMessage = 'Success! The robot successfully reached the target destination!';
@@ -488,6 +492,9 @@ export class PythonExecutor {
         let msg = 'Script finished, but the box is not on the target pad.';
         if (this.successCondition === 'any-print') {
           msg = 'Script finished, but no print command was executed.';
+        } else if (this.successCondition === 'print-exact') {
+          const lastPrint = this.printedValues[this.printedValues.length - 1];
+          msg = `Script finished, but did not print the expected output: "${this.expectedOutput}". Got: "${lastPrint || ''}".`;
         } else if (this.state.robot.holding) {
           msg = 'Script finished, but the robot is still holding the box.';
         }
@@ -527,19 +534,14 @@ export class PythonExecutor {
       }
 
       if (stmt.type === 'assign') {
-        const val = this.evalExpression(stmt.valueExpr);
-        // support numbers or range/string expressions
-        if (!isNaN(Number(stmt.valueExpr))) {
-          this.variables.set(stmt.name, Number(stmt.valueExpr));
-        } else {
-          this.variables.set(stmt.name, val);
-        }
+        const val = evaluateArithmetic(stmt.valueExpr, this.variables);
+        this.variables.set(stmt.name, val);
         this.addAction(stmt.line, 'assign', [stmt.name, val], true, undefined, before, cloneState(this.state));
         continue;
       }
 
       if (stmt.type === 'for') {
-        const rangeVal = Number(this.evalExpression(stmt.rangeExpr));
+        const rangeVal = Number(evaluateArithmetic(stmt.rangeExpr, this.variables));
         if (isNaN(rangeVal)) {
           throw new Error(`TypeError: range() expects an integer, got "${stmt.rangeExpr}"`);
         }
@@ -623,6 +625,7 @@ export class PythonExecutor {
       const result = cmdDef.execute(this.state, args);
       if (name === 'print') {
         this.hasPrinted = true;
+        this.printedValues.push(args[0] !== undefined ? String(args[0]) : '');
       }
       const actionType = (name === 'move' || name === 'rotate' || name === 'grab' || name === 'drop' || name === 'print')
         ? name as VMAction['type']
@@ -657,3 +660,169 @@ export class PythonExecutor {
     }
   }
 }
+
+// ── Arithmetic Expression Evaluator Helpers ──────────────────────────────
+
+function tokenizeExpr(str: string): string[] {
+  const tokens: string[] = [];
+  let i = 0;
+  while (i < str.length) {
+    const char = str[i];
+    if (/\s/.test(char)) {
+      i++;
+      continue;
+    }
+    // String literal
+    if (char === '"' || char === "'") {
+      const quote = char;
+      let val = '';
+      i++;
+      while (i < str.length && str[i] !== quote) {
+        val += str[i];
+        i++;
+      }
+      if (i >= str.length) {
+        throw new Error("SyntaxError: EOL while scanning string literal");
+      }
+      i++; // skip quote
+      tokens.push(JSON.stringify(val));
+      continue;
+    }
+    // Number literal
+    if (/\d/.test(char) || (char === '.' && i + 1 < str.length && /\d/.test(str[i + 1]))) {
+      let val = '';
+      while (i < str.length && (/\d/.test(str[i]) || str[i] === '.')) {
+        val += str[i];
+        i++;
+      }
+      tokens.push(val);
+      continue;
+    }
+    // Identifier
+    if (/[a-zA-Z_]/.test(char)) {
+      let val = '';
+      while (i < str.length && /[a-zA-Z0-9_]/.test(str[i])) {
+        val += str[i];
+        i++;
+      }
+      tokens.push(val);
+      continue;
+    }
+    // Parentheses
+    if (char === '(' || char === ')') {
+      tokens.push(char);
+      i++;
+      continue;
+    }
+    // Double character operators: //
+    if (char === '/' && i + 1 < str.length && str[i + 1] === '/') {
+      tokens.push('//');
+      i += 2;
+      continue;
+    }
+    // Single character operators: +, -, *, /, %
+    if ('+-*/%'.includes(char)) {
+      tokens.push(char);
+      i++;
+      continue;
+    }
+    throw new Error(`SyntaxError: Unknown character in expression: "${char}"`);
+  }
+  return tokens;
+}
+
+function evaluateArithmetic(exprStr: string, variables: Map<string, any>): any {
+  const tokens = tokenizeExpr(exprStr);
+  if (tokens.length === 0) {
+    throw new Error("SyntaxError: Empty expression");
+  }
+
+  const outputQueue: any[] = [];
+  const operatorStack: string[] = [];
+  const precedence: Record<string, number> = {
+    '+': 1,
+    '-': 1,
+    '*': 2,
+    '/': 2,
+    '//': 2,
+    '%': 2,
+  };
+
+  for (const token of tokens) {
+    if (token.startsWith('"') && token.endsWith('"')) {
+      outputQueue.push(JSON.parse(token));
+    } else if (!isNaN(Number(token))) {
+      outputQueue.push(Number(token));
+    } else if (token === 'True') {
+      outputQueue.push(true);
+    } else if (token === 'False') {
+      outputQueue.push(false);
+    } else if (precedence[token] !== undefined) {
+      while (
+        operatorStack.length > 0 &&
+        operatorStack[operatorStack.length - 1] !== '(' &&
+        precedence[operatorStack[operatorStack.length - 1]] >= precedence[token]
+      ) {
+        outputQueue.push(operatorStack.pop());
+      }
+      operatorStack.push(token);
+    } else if (token === '(') {
+      operatorStack.push(token);
+    } else if (token === ')') {
+      while (operatorStack.length > 0 && operatorStack[operatorStack.length - 1] !== '(') {
+        outputQueue.push(operatorStack.pop());
+      }
+      if (operatorStack.length === 0) {
+        throw new Error("SyntaxError: Mismatched parentheses");
+      }
+      operatorStack.pop();
+    } else {
+      if (!variables.has(token)) {
+        throw new Error(`NameError: name "${token}" is not defined.`);
+      }
+      outputQueue.push(variables.get(token));
+    }
+  }
+
+  while (operatorStack.length > 0) {
+    const op = operatorStack.pop();
+    if (op === '(' || op === ')') {
+      throw new Error("SyntaxError: Mismatched parentheses");
+    }
+    outputQueue.push(op);
+  }
+
+  const stack: any[] = [];
+  for (const item of outputQueue) {
+    if (precedence[item] !== undefined) {
+      if (stack.length < 2) {
+        throw new Error("SyntaxError: Invalid expression");
+      }
+      const b = stack.pop();
+      const a = stack.pop();
+      let res: any;
+      if (item === '+') {
+        res = a + b;
+      } else if (item === '-') {
+        res = a - b;
+      } else if (item === '*') {
+        res = a * b;
+      } else if (item === '/') {
+        res = a / b;
+      } else if (item === '//') {
+        res = Math.floor(a / b);
+      } else if (item === '%') {
+        res = a % b;
+      }
+      stack.push(res);
+    } else {
+      stack.push(item);
+    }
+  }
+
+  if (stack.length !== 1) {
+    throw new Error("SyntaxError: Invalid expression");
+  }
+  return stack[0];
+}
+

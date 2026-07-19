@@ -55,6 +55,12 @@ export const ACHIEVEMENTS: Achievement[] = [
     title: 'Par Breaker',
     description: 'Solve a puzzle beating par metrics for both instruction count and lines of code.',
     badgeName: 'ELITE'
+  },
+  {
+    id: 'single_line_solver',
+    title: 'Single-Line Solver',
+    description: 'Solve the Power Calculator puzzle in 2 or fewer non-comment lines of code.',
+    badgeName: 'CALCULATOR'
   }
 ];
 
@@ -103,6 +109,11 @@ export function getEarnedAchievements(saveData: SaveData): string[] {
         if (beatLines && beatInstructions) {
           if (!earned.includes('par_breaker')) earned.push('par_breaker');
         }
+      }
+
+      // 6. Single-Line Solver: solved 007-power-calculator with <= 2 non-comment lines
+      if (puzzleId === '007-power-calculator' && sol.metrics.lines <= 2 && sol.metrics.lines > 0) {
+        if (!earned.includes('single_line_solver')) earned.push('single_line_solver');
       }
     }
   }

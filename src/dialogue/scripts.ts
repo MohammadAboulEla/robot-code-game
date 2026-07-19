@@ -89,6 +89,78 @@ export const DIALOGUE_SCRIPTS: Record<string, DialogueScript> = {
       },
     ],
   },
+  // ── Puzzle 6: First Memory ──────────────────────────────────────────────
+  'puzzle-6-intro': {
+    id: 'puzzle-6-intro',
+    lines: [
+      {
+        speaker: 'PY-101',
+        expression: 'confused',
+        text: 'MY SENSORS ARE ONLINE AND RECORDING VITALS, BUT MY VOLATILE STORAGE CHIPS ARE GLITCHING. I CANNOT RETAIN THE VALS.',
+        requiresConfirm: true,
+      },
+      {
+        speaker: 'PY-101',
+        expression: 'talking',
+        text: "WE NEED TO STORE the ENERGY READING IN A MEMORY VARIABLE. CHECK THE SENSOR READOUT AND DECLARE energy = 73.",
+        requiresConfirm: true,
+      },
+      {
+        speaker: 'PY-101',
+        expression: 'pointing',
+        text: "THEN, print(energy) TO RETRIEVE THE VALUE. THIS CONFIRMS DATA RETENTION LOGIC IS ONLINE.",
+        requiresConfirm: true,
+      },
+    ],
+  },
+  // ── Puzzle 7: Power Calculator ──────────────────────────────────────────
+  'puzzle-7-intro': {
+    id: 'puzzle-7-intro',
+    lines: [
+      {
+        speaker: 'PY-101',
+        expression: 'idle',
+        text: 'WE ARE APPROACHING THE AUXILIARY DOCKING HUB. THE SHIELD GENERATOR DOCKING SYSTEM REQUIRES A SPECIFIC POWER INPUT SEQUENCE.',
+        requiresConfirm: true,
+      },
+      {
+        speaker: 'PY-101',
+        expression: 'talking',
+        text: "IT REQUIRES THE PRODUCT OF BASE OUTPUT (15) AND EFFICIENCY RATING (4). INSTEAD OF WRITING THE TOTAL BY HAND, LET'S HAVE PYTHON DO THE MATH.",
+        requiresConfirm: true,
+      },
+      {
+        speaker: 'PY-101',
+        expression: 'pointing',
+        text: 'CALCULATE THE VALUE BY MULTIPLYING 15 BY 4 AND print() THE RESULT. YOU CAN DO IT IN ONE EXPRESSION OR MULTIPLE STEPS!',
+        requiresConfirm: true,
+      },
+    ],
+  },
+  // ── Puzzle 8: Communication Array ───────────────────────────────────────
+  'puzzle-8-intro': {
+    id: 'puzzle-8-intro',
+    lines: [
+      {
+        speaker: 'PY-101',
+        expression: 'excited',
+        text: 'WE ARE ALIGNED WITH THE BROADCAST ANTENNA ARRAY. TO SYNCHRONIZE MY COMMUNICATOR, WE NEED TO SEND A VALID STATUS PACKET.',
+        requiresConfirm: true,
+      },
+      {
+        speaker: 'PY-101',
+        expression: 'talking',
+        text: 'THE PACKET MUST BE CONSTRUCTED FROM SEGMENTS. IN PYTHON, TEXT IS CALLED A STRING, AND WE CAN JOIN OR CONCATENATE THEM USING "+".',
+        requiresConfirm: true,
+      },
+      {
+        speaker: 'PY-101',
+        expression: 'pointing',
+        text: 'JOIN THE VARIABLES p1, p2, p3, AND p4 WITH SPACES IN BETWEEN TO CONSTRUCT AND print() "PY-101 COMM LINK OK".',
+        requiresConfirm: true,
+      },
+    ],
+  },
   // ── Puzzle 2: Around the Wall ───────────────────────────────────────────
   'puzzle-2-intro': {
     id: 'puzzle-2-intro',

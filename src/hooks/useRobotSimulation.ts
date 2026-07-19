@@ -169,7 +169,7 @@ export function useRobotSimulation(
     
     try {
       const ast = parsePython(code);
-      const executor = new PythonExecutor(initialWorld, commandRegistry, puzzle.successCondition);
+      const executor = new PythonExecutor(initialWorld, commandRegistry, puzzle.successCondition, puzzle.expectedOutput);
       const actions = executor.run(ast);
       
       if (actions.length === 0) {
@@ -199,7 +199,7 @@ export function useRobotSimulation(
     if (actionQueue.length === 0) {
       try {
         const ast = parsePython(code);
-        const executor = new PythonExecutor(initialWorld, commandRegistry, puzzle.successCondition);
+        const executor = new PythonExecutor(initialWorld, commandRegistry, puzzle.successCondition, puzzle.expectedOutput);
         const actions = executor.run(ast);
         if (actions.length === 0) {
           throw new Error('No instructions generated.');

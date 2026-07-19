@@ -48,7 +48,9 @@ export interface PuzzleDefinition {
   allowedCommandIds: string[];
   starterCode: string;
   parMetrics?: { instructions: number; lines: number };
-  successCondition?: 'cargo-delivery' | 'any-print' | 'robot-on-target';
+  successCondition?: 'cargo-delivery' | 'any-print' | 'robot-on-target' | 'print-exact';
+  expectedOutput?: string;
+  sensorData?: { unitId: string; energy: number; temperature: number };
 }
 
 export interface SolutionMetrics {

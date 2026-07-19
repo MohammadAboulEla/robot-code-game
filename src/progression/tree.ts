@@ -51,6 +51,58 @@ export const TREE_NODES: TreeNode[] = [
     recapText: 'move() DRIVES THE UNIT FORWARD BY ONE GRID TILE ALONG ITS CURRENT HEADING.'
   },
   {
+    id: 'variables',
+    title: 'Variables & Data',
+    unlocksCommandIds: [],
+    docMarkdown:
+      '## Variables & Data\n\n' +
+      'Variables are used to store data values in memory. Create a variable by using the assignment operator `=`:\n\n' +
+      '```python\n' +
+      'energy = 73\n' +
+      'print(energy)\n' +
+      '```\n\n' +
+      'You can reference and print the stored value at any time.',
+    prerequisiteNodeIds: ['basics'],
+    unlockedByPuzzleId: '001-first-steps',
+    recapText: 'VARIABLES ALLOW US TO STORE DATA VALUES IN MEMORY FOR REUSE.'
+  },
+  {
+    id: 'arithmetic',
+    title: 'Arithmetic Operations',
+    unlocksCommandIds: [],
+    docMarkdown:
+      '## Arithmetic Operations\n\n' +
+      'Perform calculations directly in Python. Supported operators include:\n\n' +
+      '- Addition: `+`\n' +
+      '- Subtraction: `-`\n' +
+      '- Multiplication: `*`\n' +
+      '- Division: `/` or `//` (integer division)\n' +
+      '- Modulo: `%` (remainder)\n\n' +
+      '```python\n' +
+      'power = 15 * 4\n' +
+      'print(power)\n' +
+      '```',
+    prerequisiteNodeIds: ['variables'],
+    unlockedByPuzzleId: '006-first-memory',
+    recapText: 'ARITHMETIC OPERATORS ENABLE COMPLEX DIAGNOSTIC AND POWER CALCULATIONS.'
+  },
+  {
+    id: 'strings',
+    title: 'Strings & Concatenation',
+    unlocksCommandIds: [],
+    docMarkdown:
+      '## Strings & Concatenation\n\n' +
+      'Text variables are called Strings in Python. You can join strings together using the `+` operator. ' +
+      'This process is called **concatenation**.\n\n' +
+      '```python\n' +
+      'greeting = "Hello" + " " + "World"\n' +
+      'print(greeting)\n' +
+      '```',
+    prerequisiteNodeIds: ['arithmetic'],
+    unlockedByPuzzleId: '007-power-calculator',
+    recapText: 'CONCATENATION COMBINES TEXT FRAGMENTS TO FORMAT DIAGNOSTIC AND STATUS MESSAGES.'
+  },
+  {
     id: 'move-directions',
     title: 'Directional Movement',
     unlocksCommandIds: [],
@@ -61,8 +113,8 @@ export const TREE_NODES: TreeNode[] = [
       '- `move("left")`\n' +
       '- `move("right")`\n' +
       '- `move("back")`',
-    prerequisiteNodeIds: ['basics'],
-    unlockedByPuzzleId: '001-first-steps',
+    prerequisiteNodeIds: ['strings'],
+    unlockedByPuzzleId: '008-comms-array',
     recapText: 'move("left"), move("right"), AND move("back") SIDE-STEP RELATIVE TO THE DRONE\'S HEADING.'
   },
   {

@@ -169,7 +169,7 @@ yet. Prototype it in Test Mode with fake values first, per the ground rule above
 ---
 
 ## Milestone 3 — First Memory & Power Calculator
-**Status:** ☐ Not started
+**Status:** ✅ Done
 
 **Steps:**
 1. Author `006-first-memory`: a puzzle using the `SensorReadout` component from
@@ -200,7 +200,7 @@ existing infrastructure.
 ---
 
 ## Milestone 4 — Communication Array
-**Status:** ☐ Not started
+**Status:** ✅ Done
 
 **Steps:**
 1. Author `008-comms-array` per `pre-PRD3.md` Chapter 3: fragmented message

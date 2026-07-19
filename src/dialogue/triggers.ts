@@ -27,6 +27,21 @@ export const DIALOGUE_TRIGGERS: DialogueTriggerDef[] = [
   },
   {
     trigger: 'puzzleLoad',
+    scriptId: 'puzzle-6-intro',
+    puzzleId: '006-first-memory',
+  },
+  {
+    trigger: 'puzzleLoad',
+    scriptId: 'puzzle-7-intro',
+    puzzleId: '007-power-calculator',
+  },
+  {
+    trigger: 'puzzleLoad',
+    scriptId: 'puzzle-8-intro',
+    puzzleId: '008-comms-array',
+  },
+  {
+    trigger: 'puzzleLoad',
     scriptId: 'puzzle-2-intro',
     puzzleId: '002-around-the-wall',
   },
