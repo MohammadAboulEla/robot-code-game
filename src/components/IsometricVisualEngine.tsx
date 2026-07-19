@@ -19,6 +19,7 @@ interface IsometricVisualEngineProps {
   isPlaying?: boolean;
   puzzleId?: string;
   onReceiveCall?: () => void;
+  onTileClick?: (x: number, y: number) => void;
 }
 
 function getActionToastMessage(action: VMAction): string {
@@ -188,6 +189,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                       strokeWidth={isHovered ? '1.5' : '0.8'}
                       onMouseEnter={() => setHoveredTile({ x, y })}
                       onMouseLeave={() => setHoveredTile(null)}
+                      onClick={() => onTileClick?.(x, y)}
                       className="transition-colors duration-150 cursor-pointer"
                     />
 

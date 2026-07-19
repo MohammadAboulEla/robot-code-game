@@ -16,6 +16,8 @@ interface HeaderProps {
   isPlaygroundActive?: boolean;
   onTogglePlayground?: () => void;
   onResetProgress?: () => void;
+  isTestModeActive?: boolean;
+  onToggleTestMode?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -25,7 +27,9 @@ export const Header: React.FC<HeaderProps> = ({
   isDev,
   isPlaygroundActive,
   onTogglePlayground,
-  onResetProgress
+  onResetProgress,
+  isTestModeActive,
+  onToggleTestMode
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -92,6 +96,19 @@ export const Header: React.FC<HeaderProps> = ({
                   }`}
                 >
                   {isPlaygroundActive ? "Exit Playground" : "Playground"}
+                </button>
+              )}
+              {onToggleTestMode && (
+                <button
+                  onClick={onToggleTestMode}
+                  title={isTestModeActive ? "Exit Test Mode" : "Enter Test Mode"}
+                  className={`px-1.5 py-0.5 text-[9px] font-mono border border-[#3e382d] cursor-pointer transition uppercase font-bold ${
+                    isTestModeActive
+                      ? 'bg-[#9c3526] text-[#faf8f2] hover:bg-[#822c20]'
+                      : 'bg-[#faf8f2] text-[#5c5341] hover:bg-[#eae3ce]'
+                  }`}
+                >
+                  {isTestModeActive ? "Exit Test Mode" : "Test Mode"}
                 </button>
               )}
               {onResetProgress && (

@@ -50,6 +50,7 @@ export function useDialogue() {
 
   return {
     activeScript,
+    setActiveScript,
     sendDialogue,
     dismissDialogue,
     fireDialogueTrigger,

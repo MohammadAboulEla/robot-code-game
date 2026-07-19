@@ -15,6 +15,7 @@ import { GameView } from './components/GameView';
 import { DialoguePopup } from './components/DialoguePopup';
 import { useDialogue } from './hooks/useDialogue';
 import { ConfirmModal } from './components/ConfirmModal';
+import { TestModeView } from './components/TestModeView';
 
 export default function App() {
   const [selectedPuzzle, setSelectedPuzzle] = useState<PuzzleDefinition | null>(null);
@@ -22,7 +23,7 @@ export default function App() {
   const [solvedCounter, setSolvedCounter] = useState(0);
 
   // Dialogue engine
-  const { activeScript, dismissDialogue, fireDialogueTrigger } = useDialogue();
+  const { activeScript, setActiveScript, dismissDialogue, fireDialogueTrigger } = useDialogue();
 
   // Playground Mode states
   const [isPlaygroundMode, setIsPlaygroundMode] = useState(false);
@@ -31,6 +32,9 @@ export default function App() {
 
   // Reset confirmation state
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+
+  // Test Mode states
+  const [isTestModeActive, setIsTestModeActive] = useState(false);
 
   // Detect dev mode (query parameter ?dev=1 or running in development mode)
   const isDevUrlParam = useMemo(() => {
@@ -66,10 +70,22 @@ export default function App() {
       const next = !prev;
       if (next) {
         setPlaygroundPuzzle(selectedPuzzle || PUZZLES[0]);
+        setIsTestModeActive(false);
       }
       return next;
     });
   }, [selectedPuzzle]);
+
+  const handleToggleTestMode = useCallback(() => {
+    setIsTestModeActive(prev => {
+      const next = !prev;
+      if (next) {
+        setSelectedPuzzle(null);
+        setIsPlaygroundMode(false);
+      }
+      return next;
+    });
+  }, []);
 
   // Compute unlocked node and command IDs from save data, re-run whenever solvedCounter updates
   const unlockedNodeIds = useMemo(() => getUnlockedNodeIds(), [solvedCounter]);
@@ -91,6 +107,7 @@ export default function App() {
   const handleBackToPuzzles = useCallback(() => {
     setSelectedPuzzle(null);
     setIsPlaygroundMode(false);
+    setIsTestModeActive(false);
   }, []);
 
   const handlePuzzleSolved = useCallback(() => {
@@ -158,19 +175,23 @@ export default function App() {
       
       {/* Vintage Header bar */}
       <Header 
-        showBackButton={!!activePuzzle}
-        onBack={handleBackToPuzzles}
-        puzzleTitle={activePuzzle?.title}
+        showBackButton={!!activePuzzle || isTestModeActive}
+        onBack={isTestModeActive ? handleToggleTestMode : handleBackToPuzzles}
+        puzzleTitle={isTestModeActive ? 'Developer Diagnostics' : activePuzzle?.title}
         isDev={isDevUrlParam}
         isPlaygroundActive={isPlaygroundMode}
         onTogglePlayground={handleTogglePlaygroundMode}
         onResetProgress={handleResetProgress}
+        isTestModeActive={isTestModeActive}
+        onToggleTestMode={handleToggleTestMode}
       />
 
       {/* Retro horizontal status ticker */}
       <Ticker />
 
-      {activePuzzle ? (
+      {isTestModeActive ? (
+        <TestModeView onLaunchDialogue={setActiveScript} />
+      ) : activePuzzle ? (
         <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
           <GameView
             key={isPlaygroundMode ? `playground-${activePuzzle.id}-${playgroundReloadCounter}` : activePuzzle.id}
