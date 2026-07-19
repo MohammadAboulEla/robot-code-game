@@ -34,6 +34,7 @@ interface InspectorPanelProps {
   actionQueue?: VMAction[];
   currentIndex?: number;
   isDebugMode?: boolean;
+  onNextMission?: () => void;
 }
 
 type TabType = 'visual' | 'objective' | 'manual' | 'commands' | 'compass' | 'archive';
@@ -55,7 +56,8 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
   resetSimulation,
   actionQueue,
   currentIndex,
-  isDebugMode = false
+  isDebugMode = false,
+  onNextMission
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('visual');
 
@@ -197,6 +199,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
             currentIndex={currentIndex}
             isDebugMode={isDebugMode}
             hideWrapper={true}
+            onNextMission={onNextMission}
           />
         )}
         

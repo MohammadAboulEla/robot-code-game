@@ -28,6 +28,7 @@ interface GameViewProps {
     onSelectPuzzle: (puzzle: PuzzleDefinition) => void;
     onHotReload: (newPuzzle: PuzzleDefinition) => void;
   };
+  onNextMission?: () => void;
 }
 
 export const GameView: React.FC<GameViewProps> = ({
@@ -37,7 +38,8 @@ export const GameView: React.FC<GameViewProps> = ({
   onPuzzleSolved,
   onBack,
   isPlaygroundMode = false,
-  playgroundProps
+  playgroundProps,
+  onNextMission
 }) => {
   const {
     code,
@@ -141,6 +143,7 @@ export const GameView: React.FC<GameViewProps> = ({
               actionQueue={actionQueue}
               currentIndex={currentIndex}
               isDebugMode={isDebugMode}
+              onNextMission={onNextMission}
             />
           </div>
         </div>
@@ -201,6 +204,7 @@ export const GameView: React.FC<GameViewProps> = ({
               actionQueue={actionQueue}
               currentIndex={currentIndex}
               isDebugMode={isDebugMode}
+              onNextMission={onNextMission}
             />
           </div>
         </div>

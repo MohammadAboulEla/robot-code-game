@@ -96,6 +96,25 @@ export default function App() {
     }
   }, [activePuzzle, fireDialogueTrigger]);
 
+  const nextPuzzle = useMemo(() => {
+    if (!activePuzzle) return null;
+    const currentIndex = PUZZLES.findIndex(p => p.id === activePuzzle.id);
+    if (currentIndex !== -1 && currentIndex < PUZZLES.length - 1) {
+      return PUZZLES[currentIndex + 1];
+    }
+    return null;
+  }, [activePuzzle]);
+
+  const handleNextMission = useCallback(() => {
+    if (!nextPuzzle) return;
+    if (isPlaygroundMode) {
+      setPlaygroundPuzzle(nextPuzzle);
+      setPlaygroundReloadCounter(c => c + 1);
+    } else {
+      setSelectedPuzzle(nextPuzzle);
+    }
+  }, [nextPuzzle, isPlaygroundMode]);
+
   // Fire puzzleLoad dialogue trigger when a puzzle is selected
   useEffect(() => {
     if (selectedPuzzle && !isPlaygroundMode) {
@@ -148,6 +167,7 @@ export default function App() {
             onPuzzleSolved={handlePuzzleSolved}
             onBack={handleBackToPuzzles}
             isPlaygroundMode={isPlaygroundMode}
+            onNextMission={nextPuzzle ? handleNextMission : undefined}
             // Playground specific props
             playgroundProps={
               isPlaygroundMode && playgroundPuzzle ? {
