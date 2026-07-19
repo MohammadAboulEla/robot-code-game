@@ -190,11 +190,9 @@ export const DialoguePopup: React.FC<DialoguePopupProps> = ({ script, onComplete
               </p>
 
               {/* Progress Indicator Block */}
-              <div className="mt-4 shrink-0">
-                <div className="w-fit mx-auto border border-[#3e382d]/30 bg-[#ded9c6]/85 hover:bg-[#d2cbae] transition-colors duration-150 py-1.5 px-6 rounded-md shadow-sm text-center">
-                  <span className="font-mono text-[10px] font-bold text-[#4a4235] tracking-widest uppercase">
-                    [ {isLastLine ? 'PRESS ENTER TO CLOSE' : 'PRESS ENTER TO CONTINUE'} ]
-                  </span>
+              <div className="mt-4 shrink-0 flex justify-center items-center">
+                <div className="bg-[#9c3526] hover:bg-[#822c20] text-[#faf8f2] font-bold text-[10px] py-2 px-6 border border-[#3e382d] cursor-pointer flex items-center justify-center uppercase tracking-wider transition-colors shadow-sm w-fit">
+                  {isLastLine ? 'Press Enter to Close' : 'Press Enter to Continue'}
                 </div>
               </div>
             </div>
