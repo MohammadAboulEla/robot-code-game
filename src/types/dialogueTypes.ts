@@ -17,7 +17,7 @@ export type RobotExpression =
   | 'angry';
 
 /**
- * Sprite sheet is a 3×3 grid in assets/sprite.png.
+ * Sprite sheet is a 3×3 grid in assets/sprite.webp.
  * Each cell maps to a row/col coordinate for CSS background-position.
  */
 export const EXPRESSION_SPRITE_MAP: Record<RobotExpression, { row: number; col: number }> = {

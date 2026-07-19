@@ -56,7 +56,7 @@ Existing puzzles from `PRD.md`'s later milestones shift down to make room; renum
 **Status:** ☑ Completed
 
 **Steps:**
-1. Slice `assets/sprite.png` into named expression frames (e.g. `idle`, `happy`,
+1. Slice `assets/sprite.webp` into named expression frames (e.g. `idle`, `happy`,
    `talking`, `thinking`, `confused`, `annoyed`, `crossed-arms`, `pointing`, `angry` — match
    whatever the sheet actually contains) and store as individual image assets or a CSS
    sprite-sheet with coordinate map; add a `RobotExpression` type enumerating them.

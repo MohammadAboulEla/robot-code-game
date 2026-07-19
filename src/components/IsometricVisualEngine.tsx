@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Layers, CheckCircle2, XCircle } from 'lucide-react';
 import { GameWorldState, VMAction } from '../robotInterpreter';
 import { tileW, tileH, getIsoCoords, getTilePoints } from '../utils/isometricHelpers';
-import spriteSheet from '../../assets/sprite.png';
+import spriteSheet from '../../assets/sprite.webp';
 import { EXPRESSION_SPRITE_MAP, RobotExpression } from '../types/dialogueTypes';
 
 interface IsometricVisualEngineProps {
@@ -63,8 +63,8 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
 }) => {
   const [hoveredTile, setHoveredTile] = useState<{ x: number; y: number } | null>(null);
 
-  const currentAction = isDebugMode && actionQueue && currentIndex !== undefined && currentIndex >= 0 
-    ? actionQueue[currentIndex] 
+  const currentAction = isDebugMode && actionQueue && currentIndex !== undefined && currentIndex >= 0
+    ? actionQueue[currentIndex]
     : null;
   const toastMsg = currentAction ? getActionToastMessage(currentAction) : '';
 
@@ -72,9 +72,9 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
     if (isSuccess) return 'excited';
     if (errorMessage) {
       if (
-        errorMessage.includes('InfiniteLoopError') || 
-        errorMessage.includes('Collision') || 
-        errorMessage.includes('Boundary') || 
+        errorMessage.includes('InfiniteLoopError') ||
+        errorMessage.includes('Collision') ||
+        errorMessage.includes('Boundary') ||
         errorMessage.includes('crashed')
       ) {
         return 'confused';
@@ -91,12 +91,10 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
   const bgPosY = spriteCoords.row * 50;
 
   return (
-    <div className={`relative flex flex-col overflow-hidden flex-1 min-h-0 h-full ${
-      hideWrapper ? '' : 'bg-[#f4efe1] border border-[#3e382d] shadow-sm'
-    } ${
-      (isDebugMode && errorMessage) ? 'animate-shake' : ''
-    }`}>
-      
+    <div className={`relative flex flex-col overflow-hidden flex-1 min-h-0 h-full ${hideWrapper ? '' : 'bg-[#f4efe1] border border-[#3e382d] shadow-sm'
+      } ${(isDebugMode && errorMessage) ? 'animate-shake' : ''
+      }`}>
+
       {/* Viewport Header */}
       {!hideWrapper && (
         <div className="border-b border-[#3e382d] px-4 py-3 bg-[#eae3ce] flex justify-between items-center shrink-0">
@@ -137,9 +135,9 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
             {currentExpression}
           </span>
         </div>
-        
-        <svg 
-          viewBox="0 -30 500 350" 
+
+        <svg
+          viewBox="0 -30 500 350"
           className="w-full h-full max-w-lg filter drop-shadow-[0_4px_8px_rgba(62,56,45,0.15)]"
         >
           <defs>
@@ -152,15 +150,15 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
 
           {/* 1. Ground Level Render Grid */}
           <g id="iso-ground">
-            {Array.from({ length: worldState.gridSize.height }).map((_, y) => 
+            {Array.from({ length: worldState.gridSize.height }).map((_, y) =>
               Array.from({ length: worldState.gridSize.width }).map((_, x) => {
                 const isHovered = hoveredTile?.x === x && hoveredTile?.y === y;
                 const isTarget = worldState.target.x === x && worldState.target.y === y;
-                
+
                 // Retro warm sandstone tiles
                 let fill = '#eae3ce'; // primary tile sand
                 let stroke = '#c4bda3'; // grid lines
-                
+
                 if ((x + y) % 2 === 0) {
                   fill = '#e4dbbf'; // offset darker sand
                 }
@@ -189,25 +187,25 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                       onMouseLeave={() => setHoveredTile(null)}
                       className="transition-colors duration-150 cursor-pointer"
                     />
-                    
+
                     {/* Concentric targets indicators */}
                     {isTarget && (
                       <g pointerEvents="none">
-                        <ellipse 
-                          cx={getIsoCoords(x, y).x} 
-                          cy={getIsoCoords(x, y).y} 
-                          rx={tileW / 3} 
-                          ry={tileH / 3} 
-                          fill="none" 
-                          stroke={worldState.box.x === x && worldState.box.y === y && !worldState.robot.holding ? '#81a364' : '#9c3526'} 
-                          strokeWidth="1.2" 
+                        <ellipse
+                          cx={getIsoCoords(x, y).x}
+                          cy={getIsoCoords(x, y).y}
+                          rx={tileW / 3}
+                          ry={tileH / 3}
+                          fill="none"
+                          stroke={worldState.box.x === x && worldState.box.y === y && !worldState.robot.holding ? '#81a364' : '#9c3526'}
+                          strokeWidth="1.2"
                           strokeDasharray="4,2"
                         />
-                        <circle 
-                          cx={getIsoCoords(x, y).x} 
-                          cy={getIsoCoords(x, y).y} 
+                        <circle
+                          cx={getIsoCoords(x, y).x}
+                          cy={getIsoCoords(x, y).y}
                           r="3"
-                          fill={worldState.box.x === x && worldState.box.y === y && !worldState.robot.holding ? '#81a364' : '#9c3526'} 
+                          fill={worldState.box.x === x && worldState.box.y === y && !worldState.robot.holding ? '#81a364' : '#9c3526'}
                         />
                       </g>
                     )}
@@ -233,15 +231,15 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                     {/* Left Side Face (Wood/Basalt bronze brown) */}
                     <polygon
                       points={`${sx - tileW / 2},${sy - h} ${sx},${sy - tileH / 2 - h + tileH} ${sx},${sy + tileH / 2} ${sx - tileW / 2},${sy}`}
-                      fill="#5c5345" 
+                      fill="#5c5345"
                       stroke="#2e2a22"
                       strokeWidth="0.8"
                     />
-                    
+
                     {/* Right Side Face */}
                     <polygon
                       points={`${sx},${sy - tileH / 2 - h + tileH} ${sx + tileW / 2},${sy - h} ${sx + tileW / 2},${sy} ${sx},${sy + tileH / 2}`}
-                      fill="#4a4235" 
+                      fill="#4a4235"
                       stroke="#2e2a22"
                       strokeWidth="0.8"
                     />
@@ -249,7 +247,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                     {/* Top Face */}
                     <polygon
                       points={`${sx},${sy - tileH / 2 - h} ${sx + tileW / 2},${sy - h} ${sx},${sy + tileH / 2 - h} ${sx - tileW / 2},${sy - h}`}
-                      fill="#7e725f" 
+                      fill="#7e725f"
                       stroke="#2e2a22"
                       strokeWidth="0.8"
                     />
@@ -281,7 +279,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                       stroke="#92400e"
                       strokeWidth="0.8"
                     />
-                    
+
                     {/* Right side face */}
                     <polygon
                       points={`${sx},${sy - bSize / 2 - h + bSize} ${sx + bSize},${sy - h} ${sx + bSize},${sy} ${sx},${sy + bSize / 2}`}
@@ -311,7 +309,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
           <g id="robot-unit" pointerEvents="none">
             {(() => {
               const { x: sx, y: sy } = getIsoCoords(worldState.robot.x, worldState.robot.y);
-              
+
               // Face coordinates offsets based on directional vectors
               let eyeOffsetX = 0;
               let eyeOffsetY = -15;
@@ -359,14 +357,14 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
 
                   {/* Upper mechanical antenna */}
                   <line x1={sx} y1={sy - 26} x2={sx} y2={sy - 31} stroke="#5c5341" strokeWidth="1.2" />
-                  
+
                   {/* Signal Antenna Glow Bulb */}
-                  <circle 
-                    cx={sx} 
-                    cy={sy - 31} 
-                    r="2.5" 
-                    fill={signalColor} 
-                    style={{ filter: 'url(#glow)' }} 
+                  <circle
+                    cx={sx}
+                    cy={sy - 31}
+                    r="2.5"
+                    fill={signalColor}
+                    style={{ filter: 'url(#glow)' }}
                   />
 
                   {/* 5. Render held box container slightly shifted above head */}
@@ -379,17 +377,17 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                         return (
                           <g>
                             {/* Small mechanical grapple claw holding the box */}
-                            <path 
-                              d={`M ${sx - 8} ${sy - 20} Q ${sx - 12} ${bxY + 4} ${sx - 6} ${bxY + 10}`} 
-                              fill="none" 
-                              stroke="#3e382d" 
-                              strokeWidth="1.8" 
+                            <path
+                              d={`M ${sx - 8} ${sy - 20} Q ${sx - 12} ${bxY + 4} ${sx - 6} ${bxY + 10}`}
+                              fill="none"
+                              stroke="#3e382d"
+                              strokeWidth="1.8"
                             />
-                            <path 
-                              d={`M ${sx + 8} ${sy - 20} Q ${sx + 12} ${bxY + 4} ${sx + 6} ${bxY + 10}`} 
-                              fill="none" 
-                              stroke="#3e382d" 
-                              strokeWidth="1.8" 
+                            <path
+                              d={`M ${sx + 8} ${sy - 20} Q ${sx + 12} ${bxY + 4} ${sx + 6} ${bxY + 10}`}
+                              fill="none"
+                              stroke="#3e382d"
+                              strokeWidth="1.8"
                             />
 
                             {/* Left face */}
@@ -399,7 +397,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                               stroke="#78350f"
                               strokeWidth="0.8"
                             />
-                            
+
                             {/* Right face */}
                             <polygon
                               points={`${sx},${bxY - bSize / 2 - h + bSize} ${sx + bSize},${bxY - h} ${sx + bSize},${bxY} ${sx},${bxY + bSize / 2}`}
@@ -415,7 +413,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                               stroke="#d97706"
                               strokeWidth="0.8"
                             />
-                            
+
                             {/* Box visual decoration */}
                             <line x1={sx - bSize} y1={bxY - h} x2={sx} y2={bxY + bSize / 2} stroke="#78350f" strokeWidth="0.8" />
                             <line x1={sx + bSize} y1={bxY - h} x2={sx} y2={bxY + bSize / 2} stroke="#78350f" strokeWidth="0.8" />
@@ -450,14 +448,14 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                 Sequence successful. Your Python controller navigated all obstacle grids perfectly and deposited the container correctly.
               </p>
               <div className="mt-5 flex gap-3">
-                <button 
+                <button
                   onClick={resetSimulation}
                   className="flex-1 bg-[#faf8f2] hover:bg-[#eae3ce] text-[#9c3526] font-bold text-xs py-2.5 px-4 border border-[#3e382d] transition cursor-pointer font-mono"
                 >
                   TINKER FURTHER
                 </button>
                 {puzzleId === '000-say-hello' ? (
-                  <button 
+                  <button
                     onClick={() => {
                       resetSimulation();
                       onReceiveCall?.();
@@ -468,7 +466,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                   </button>
                 ) : (
                   onNextMission && (
-                    <button 
+                    <button
                       onClick={onNextMission}
                       className="flex-1 bg-[#9c3526] hover:bg-[#852a1e] text-[#faf8f2] font-bold text-xs py-2.5 px-4 border border-[#3e382d] transition cursor-pointer font-mono"
                     >
@@ -491,7 +489,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                 <h4 className="text-xs font-bold text-[#2e2a22] uppercase tracking-wider font-mono">SIMULATION HALTED</h4>
                 <p className="text-xs text-[#5c5341] mt-1 font-mono">{errorMessage}</p>
               </div>
-              <button 
+              <button
                 onClick={() => setErrorMessage(null)}
                 className="text-[#9c3526] hover:text-[#852a1e] text-xs font-bold px-1"
               >
