@@ -11,6 +11,11 @@ import type { DialogueTriggerDef } from '../types/dialogueTypes';
  */
 export const DIALOGUE_TRIGGERS: DialogueTriggerDef[] = [
   {
+    trigger: 'puzzleLoad',
+    scriptId: 'puzzle-0-intro',
+    puzzleId: '000-say-hello',
+  },
+  {
     trigger: 'puzzleSolved',
     scriptId: 'onboarding-intro',
     puzzleId: '000-say-hello',

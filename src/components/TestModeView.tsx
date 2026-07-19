@@ -4,7 +4,8 @@
  */
 
 import React, { useState } from 'react';
-import { Sparkles, Layers, Code, Play, RefreshCw } from 'lucide-react';
+import { Sparkles, Layers, Code, Play, RefreshCw, Activity } from 'lucide-react';
+import { SensorReadout } from './SensorReadout';
 import { IsometricVisualEngine } from './IsometricVisualEngine';
 import type { GameWorldState } from '../robotInterpreter';
 import type { RobotExpression, DialogueScript } from '../types/dialogueTypes';
@@ -15,13 +16,13 @@ interface TestModeViewProps {
 }
 
 type TestTool = 'robot' | 'cargo' | 'target' | 'obstacle';
-type TabType = 'dialogue' | 'grid' | 'tokenizer';
+type TabType = 'dialogue' | 'grid' | 'tokenizer' | 'vitals';
 
 export const TestModeView: React.FC<TestModeViewProps> = ({ onLaunchDialogue }) => {
   const [activeTab, setActiveTab] = useState<TabType>('dialogue');
 
   // ── Dialogue Tester State ──────────────────────────────────────────────────
-  const [speaker, setSpeaker] = useState('SYSTEM DROID UNIT-R07');
+  const [speaker, setSpeaker] = useState('PY-101');
   const [expression, setExpression] = useState<RobotExpression>('idle');
   const [dialogueText, setDialogueText] = useState(
     'Salutations, Programmer! Use move("left") or grab() commands to command R-07.'
@@ -98,6 +99,11 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ onLaunchDialogue }) 
     `# Test custom scripts here\nfor i in range(3):\n    move("left")\n    grab()\n    drop()`
   );
 
+  // ── Vitals Sensor Tester State ──────────────────────────────────────────────
+  const [vitalsUnitId, setVitalsUnitId] = useState('PY-101');
+  const [vitalsEnergy, setVitalsEnergy] = useState(72);
+  const [vitalsTemperature, setVitalsTemperature] = useState(45);
+
   const tokens = tokenizePython(testCode);
 
   return (
@@ -140,6 +146,17 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ onLaunchDialogue }) 
           >
             <Code className="w-3.5 h-3.5" />
             <span>Tokenizer / Editor</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('vitals')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[9px] font-bold border-b-2 transition uppercase tracking-wider cursor-pointer font-mono whitespace-nowrap px-4 ${
+              activeTab === 'vitals'
+                ? 'border-[#9c3526] text-[#9c3526] bg-[#faf8f2]'
+                : 'border-transparent text-[#5c5341] hover:text-[#2e2a22] hover:bg-[#faf8f2]/30'
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5" />
+            <span>Vitals Sensor</span>
           </button>
         </div>
 
@@ -338,6 +355,97 @@ export const TestModeView: React.FC<TestModeViewProps> = ({ onLaunchDialogue }) 
                   hideWrapper={true}
                   onTileClick={handleTileClick}
                 />
+              </div>
+            </div>
+          )}
+
+          {/* vitals tab */}
+          {activeTab === 'vitals' && (
+            <div className="p-5 flex flex-col md:flex-row gap-6 animate-fade-in">
+              {/* Controls (left) */}
+              <div className="flex flex-col gap-4 w-full md:w-[320px] shrink-0">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-mono text-[#5c5341] font-bold">UNIT IDENTIFIER</label>
+                  <input
+                    type="text"
+                    value={vitalsUnitId}
+                    onChange={e => setVitalsUnitId(e.target.value)}
+                    className="w-full bg-[#faf8f2] border border-[#3e382d] px-2.5 py-1.5 text-xs font-mono font-bold text-[#2e2a22]"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-mono text-[#5c5341] font-bold">ENERGY LEVEL ({vitalsEnergy}%)</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={vitalsEnergy}
+                    onChange={e => setVitalsEnergy(Number(e.target.value))}
+                    className="accent-[#9c3526]"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-mono text-[#5c5341] font-bold">CORE TEMPERATURE ({vitalsTemperature}°C)</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={vitalsTemperature}
+                    onChange={e => setVitalsTemperature(Number(e.target.value))}
+                    className="accent-[#9c3526]"
+                  />
+                </div>
+
+                {/* Quick presets */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-mono text-[#5c5341] font-bold">QUICK PRESETS</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      onClick={() => { setVitalsEnergy(95); setVitalsTemperature(32); }}
+                      className="text-[9px] font-mono font-bold text-[#2d6a4f] bg-[#faf8f2] hover:bg-[#eae3ce] border border-[#3e382d] py-1.5 px-2 cursor-pointer uppercase transition-colors"
+                    >
+                      Healthy
+                    </button>
+                    <button
+                      onClick={() => { setVitalsEnergy(30); setVitalsTemperature(78); }}
+                      className="text-[9px] font-mono font-bold text-[#b8860b] bg-[#faf8f2] hover:bg-[#eae3ce] border border-[#3e382d] py-1.5 px-2 cursor-pointer uppercase transition-colors"
+                    >
+                      Caution
+                    </button>
+                    <button
+                      onClick={() => { setVitalsEnergy(8); setVitalsTemperature(95); }}
+                      className="text-[9px] font-mono font-bold text-[#9c3526] bg-[#faf8f2] hover:bg-[#eae3ce] border border-[#3e382d] py-1.5 px-2 cursor-pointer uppercase transition-colors"
+                    >
+                      Critical
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => { setVitalsUnitId('PY-101'); setVitalsEnergy(72); setVitalsTemperature(45); }}
+                  className="w-full mt-2 bg-[#faf8f2] hover:bg-[#eae3ce] text-[#5c5341] font-mono font-bold text-xs py-2 border border-[#3e382d] cursor-pointer flex items-center justify-center gap-2 uppercase transition-colors"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Reset Defaults</span>
+                </button>
+              </div>
+
+              {/* Live preview (right) */}
+              <div className="flex-1 flex flex-col gap-3">
+                <label className="text-[10px] font-mono text-[#5c5341] font-bold">LIVE PREVIEW — SENSOR READOUT COMPONENT</label>
+                <div className="bg-[#2a2520] border border-[#3e382d] rounded-lg p-6 flex items-center justify-center min-h-[300px]">
+                  <div className="w-full max-w-sm">
+                    <SensorReadout
+                      data={{
+                        unitId: vitalsUnitId,
+                        energy: vitalsEnergy,
+                        temperature: vitalsTemperature,
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           )}

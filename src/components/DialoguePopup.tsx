@@ -18,7 +18,13 @@ interface DialoguePopupProps {
  * Formats the speaker name into the SPEKER [ROBOT UNIT ID: XXX] layout
  */
 const formatSpeakerHeader = (speaker: string) => {
-  // e.g. "SYSTEM DROID UNIT-R07" -> "SYSTEM DROID [ROBOT UNIT ID: R-07]"
+  if (speaker === '???') {
+    return '??? [UNKNOWN UNIT]';
+  }
+  if (speaker === 'PY-101') {
+    return 'SYSTEM DROID [ROBOT UNIT ID: PY-101]';
+  }
+  // Legacy fallback: e.g. "SYSTEM DROID UNIT-R07" -> "SYSTEM DROID [ROBOT UNIT ID: R-07]"
   const match = speaker.match(/^(SYSTEM DROID)\s+(UNIT-R\d+)$/i);
   if (match) {
     return `${match[1]} [ROBOT UNIT ID: ${match[2].replace('UNIT-', '')}]`;
@@ -31,7 +37,7 @@ const formatSpeakerHeader = (speaker: string) => {
  */
 const renderDialogueText = (text: string) => {
   // Regex to extract Python function calls and highlighted words
-  const regex = /(\b(?:move|rotate|grab|drop|is_holding|can_move|range|print)\s*\([^)]*\))|(\b(?:PROGRAMMER|OPERATOR|PYTHON|CARGO(?:\s+BOX)?|ROBOT|A-1|UNIT\s+R-07|SYSTEM\s+DROID|SCRIPT|COMMANDS?|PROTOCOL|DELIVERY)\b)/gi;
+  const regex = /(\b(?:move|rotate|grab|drop|is_holding|can_move|range|print)\s*\([^)]*\))|(\b(?:PROGRAMMER|OPERATOR|PYTHON|CARGO(?:\s+BOX)?|ROBOT|A-1|PY-101|UNIT\s+R-07|SYSTEM\s+DROID|SCRIPT|COMMANDS?|PROTOCOL|DELIVERY)\b)/gi;
 
   const parts = text.split(regex);
 
@@ -68,7 +74,7 @@ const renderDialogueText = (text: string) => {
       );
     }
 
-    const isTerm = /^(?:PROGRAMMER|OPERATOR|PYTHON|CARGO(?:\s+BOX)?|ROBOT|A-1|UNIT\s+R-07|SYSTEM\s+DROID|SCRIPT|COMMANDS?|PROTOCOL|DELIVERY)$/i.test(part);
+    const isTerm = /^(?:PROGRAMMER|OPERATOR|PYTHON|CARGO(?:\s+BOX)?|ROBOT|A-1|PY-101|UNIT\s+R-07|SYSTEM\s+DROID|SCRIPT|COMMANDS?|PROTOCOL|DELIVERY)$/i.test(part);
     if (isTerm) {
       return (
         <span key={index} className="text-[#1a6596] font-extrabold">
