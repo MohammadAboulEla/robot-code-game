@@ -136,19 +136,8 @@ export const DialoguePopup: React.FC<DialoguePopupProps> = ({ script, onComplete
       {/* Outer Metallic Bezel Frame */}
       <div 
         onClick={handleAdvance}
-        className="relative w-[820px] min-h-[340px] flex flex-col bg-gradient-to-br from-[#c8c0ae] via-[#a89e8b] to-[#7c7260] border-4 border-[#3e382d] rounded-[28px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6),inset_0_2px_2px_rgba(255,255,255,0.45),inset_0_-2px_2px_rgba(0,0,0,0.45)] select-none cursor-pointer"
+        className="relative w-[820px] min-h-[340px] flex flex-col bg-gradient-to-br from-[#c8c0ae] via-[#a89e8b] to-[#7c7260] border-3 border-[#3e382d] rounded-[28px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6),inset_0_2px_2px_rgba(255,255,255,0.45),inset_0_-2px_2px_rgba(0,0,0,0.45)] select-none cursor-pointer"
       >
-        {/* Top Handle / Bracket */}
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-[340px] h-3.5 bg-gradient-to-r from-[#8e8470] via-[#bfb6a2] to-[#746b57] border-2 border-[#3e382d] rounded-t-full shadow-sm z-0">
-          <div className="absolute -left-3 -top-0.5 w-3 h-4 bg-[#6e6553] border-2 border-[#3e382d] rounded-sm"></div>
-          <div className="absolute -right-3 -top-0.5 w-3 h-4 bg-[#6e6553] border-2 border-[#3e382d] rounded-sm"></div>
-        </div>
-
-        {/* Decorative Corner Rivets */}
-        <div className="absolute left-4 top-4 w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#5c5341] to-[#ded9c6] border border-[#2e2a22] shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"></div>
-        <div className="absolute right-4 top-4 w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#5c5341] to-[#ded9c6] border border-[#2e2a22] shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"></div>
-        <div className="absolute left-4 bottom-4 w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#5c5341] to-[#ded9c6] border border-[#2e2a22] shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"></div>
-        <div className="absolute right-4 bottom-4 w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#5c5341] to-[#ded9c6] border border-[#2e2a22] shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"></div>
 
         {/* Inner Recessed Panel Container */}
         <div className="m-3.5 p-4 bg-[#b5ad98] border-2 border-[#3e382d] rounded-[18px] shadow-[inset_0_4px_10px_rgba(0,0,0,0.3)] flex-1 flex gap-5 items-stretch min-h-0">
