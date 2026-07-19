@@ -53,7 +53,7 @@ Existing puzzles from `PRD.md`'s later milestones shift down to make room; renum
 ---
 
 ## Milestone 1 — Dialogue Engine & Character Popup
-**Status:** ☐ Not started
+**Status:** ☑ Completed
 
 **Steps:**
 1. Slice `assets/sprite.png` into named expression frames (e.g. `idle`, `happy`,
@@ -83,7 +83,7 @@ Existing puzzles from `PRD.md`'s later milestones shift down to make room; renum
 ---
 
 ## Milestone 2 — `print()` Command & Puzzle 0 ("Say hello")
-**Status:** ☐ Not started
+**Status:** ☑ Completed
 
 **Steps:**
 1. Add `print` as a new `CommandDefinition` in the registry (per `PRD.md`'s M0 pattern):
@@ -110,7 +110,7 @@ Existing puzzles from `PRD.md`'s later milestones shift down to make room; renum
 ---
 
 ## Milestone 3 — Beginner Puzzle Track (Puzzles 1–4) & Renumbering
-**Status:** ☐ Not started
+**Status:** ☑ Completed
 
 **Steps:**
 1. Author Puzzle 1 ("First steps"): straight-line goal reachable by 3+ calls to bare
@@ -139,7 +139,7 @@ Existing puzzles from `PRD.md`'s later milestones shift down to make room; renum
 ---
 
 ## Milestone 4 — Tree as Knowledge Recap
-**Status:** ☐ Not started
+**Status:** ☑ Completed
 
 **Steps:**
 1. Extend each progression tree node (from `PRD.md` M2) with a `recapText` or
@@ -158,7 +158,7 @@ Existing puzzles from `PRD.md`'s later milestones shift down to make room; renum
 ---
 
 ## Milestone 5 — Expression Mapping & Game-Event Juice
-**Status:** ☐ Not started
+**Status:** ☑ Completed
 
 **Steps:**
 1. Map remaining sprite expressions to concrete game events beyond onboarding dialogue:

@@ -24,7 +24,7 @@ export interface GameWorldState {
 export interface VMAction {
   id: string;
   line: number;
-  type: 'move' | 'rotate' | 'grab' | 'drop' | 'assign' | 'loop_step' | 'pass' | 'error' | 'success' | 'if_step';
+  type: 'move' | 'rotate' | 'grab' | 'drop' | 'assign' | 'loop_step' | 'pass' | 'error' | 'success' | 'if_step' | 'print';
   args: any[];
   success: boolean;
   message?: string;
@@ -334,10 +334,17 @@ export class PythonExecutor {
   private maxInstructions = 1000;
   private instructionCount = 0;
   private commandRegistry: Map<string, CommandDefinition>;
+  private successCondition: 'cargo-delivery' | 'any-print';
+  private hasPrinted = false;
 
-  constructor(initialState: GameWorldState, commandRegistry: Map<string, CommandDefinition>) {
+  constructor(
+    initialState: GameWorldState,
+    commandRegistry: Map<string, CommandDefinition>,
+    successCondition: 'cargo-delivery' | 'any-print' = 'cargo-delivery'
+  ) {
     this.state = cloneState(initialState);
     this.commandRegistry = commandRegistry;
+    this.successCondition = successCondition;
   }
 
   private addAction(
@@ -452,19 +459,36 @@ export class PythonExecutor {
       this.executeBlock(statements);
       
       // Final win condition check at end of script
-      const boxOnTarget = this.state.box.x === this.state.target.x && this.state.box.y === this.state.target.y;
-      if (boxOnTarget && !this.state.robot.holding) {
+      let isWin = false;
+      let winMessage = '';
+
+      if (this.successCondition === 'any-print') {
+        isWin = this.hasPrinted;
+        winMessage = isWin 
+          ? 'Success! You executed a print command and communicated with the robot!'
+          : 'Failed. You need to print a message to succeed.';
+      } else if (this.successCondition === 'robot-on-target') {
+        isWin = this.state.robot.x === this.state.target.x && this.state.robot.y === this.state.target.y;
+        winMessage = 'Success! The robot successfully reached the target destination!';
+      } else {
+        const boxOnTarget = this.state.box.x === this.state.target.x && this.state.box.y === this.state.target.y;
+        isWin = boxOnTarget && !this.state.robot.holding;
+        winMessage = 'Success! The box has been successfully delivered to the target pad!';
+      }
+
+      if (isWin) {
         this.addAction(
           statements[statements.length - 1]?.line || 1,
           'success',
           [],
           true,
-          'Success! The box has been successfully delivered to the target pad!'
+          winMessage
         );
       } else {
-        // If script ended but box is not on target or still holding it
         let msg = 'Script finished, but the box is not on the target pad.';
-        if (this.state.robot.holding) {
+        if (this.successCondition === 'any-print') {
+          msg = 'Script finished, but no print command was executed.';
+        } else if (this.state.robot.holding) {
           msg = 'Script finished, but the robot is still holding the box.';
         }
         this.addAction(
@@ -597,7 +621,10 @@ export class PythonExecutor {
 
     try {
       const result = cmdDef.execute(this.state, args);
-      const actionType = (name === 'move' || name === 'rotate' || name === 'grab' || name === 'drop')
+      if (name === 'print') {
+        this.hasPrinted = true;
+      }
+      const actionType = (name === 'move' || name === 'rotate' || name === 'grab' || name === 'drop' || name === 'print')
         ? name as VMAction['type']
         : 'pass';
       this.addAction(
@@ -613,7 +640,7 @@ export class PythonExecutor {
       if (err instanceof MoveError) {
         // MoveError carries a user-facing display message for the action
         // and a thrown message for the error action
-        const actionType = (name === 'move' || name === 'rotate' || name === 'grab' || name === 'drop')
+        const actionType = (name === 'move' || name === 'rotate' || name === 'grab' || name === 'drop' || name === 'print')
           ? name as VMAction['type']
           : 'pass';
         this.addAction(

@@ -48,6 +48,7 @@ export interface PuzzleDefinition {
   allowedCommandIds: string[];
   starterCode: string;
   parMetrics?: { instructions: number; lines: number };
+  successCondition?: 'cargo-delivery' | 'any-print' | 'robot-on-target';
 }
 
 export interface SolutionMetrics {

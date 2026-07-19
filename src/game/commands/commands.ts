@@ -4,6 +4,7 @@
  */
 
 import type { CommandDefinition, VMState, CommandResult } from '../../types/gameTypes';
+import { loadSaveData } from '../../state/saveData';
 
 // ── Shared helpers ──────────────────────────────────────────────────────────
 
@@ -36,7 +37,15 @@ function getAbsoluteDirection(
 // ── Command implementations ─────────────────────────────────────────────────
 
 function executeMove(vm: VMState, args: any[]): CommandResult {
-  const relativeDir = args[0];
+  const relativeDir = args[0] !== undefined ? args[0] : 'front';
+
+  if (args[0] !== undefined) {
+    const saved = loadSaveData();
+    if (!saved.unlockedNodeIds.includes('move-directions')) {
+      throw new Error(`TypeError: move() does not accept arguments in this protocol. Upgrade to "Directional Movement" in the Research Tree first.`);
+    }
+  }
+
   if (relativeDir !== 'front' && relativeDir !== 'back' && relativeDir !== 'left' && relativeDir !== 'right') {
     throw new Error(`ValueError: move() requires one of "front", "back", "left", "right". Got: ${JSON.stringify(relativeDir)}`);
   }
@@ -169,6 +178,14 @@ function executeDrop(vm: VMState, _args: any[]): CommandResult {
   };
 }
 
+function executePrint(vm: VMState, args: any[]): CommandResult {
+  const content = args[0] !== undefined ? String(args[0]) : '';
+  return {
+    success: true,
+    message: content
+  };
+}
+
 // ── MoveError: carries both a user-facing message and a thrown error message ─
 
 export class MoveError extends Error {
@@ -182,6 +199,14 @@ export class MoveError extends Error {
 // ── Registry ────────────────────────────────────────────────────────────────
 
 export const COMMANDS: CommandDefinition[] = [
+  {
+    id: 'print',
+    label: 'print',
+    signature: 'print(message)',
+    docMarkdown: 'Prints a message to the Console Output Terminal.',
+    category: 'control',
+    execute: executePrint
+  },
   {
     id: 'move',
     label: 'move',

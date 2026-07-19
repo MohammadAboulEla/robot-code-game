@@ -15,6 +15,7 @@ interface HeaderProps {
   isDev?: boolean;
   isPlaygroundActive?: boolean;
   onTogglePlayground?: () => void;
+  onResetProgress?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -23,7 +24,8 @@ export const Header: React.FC<HeaderProps> = ({
   puzzleTitle,
   isDev,
   isPlaygroundActive,
-  onTogglePlayground
+  onTogglePlayground,
+  onResetProgress
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -76,18 +78,32 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right HUD: Game Controls */}
         <div className="flex items-center gap-2">
-          {isDev && onTogglePlayground && (
-            <button
-              onClick={onTogglePlayground}
-              title={isPlaygroundActive ? "Exit Playground Mode" : "Enter Playground Mode"}
-              className={`p-1 border border-[#3e382d] cursor-pointer transition ${
-                isPlaygroundActive
-                  ? 'bg-[#9c3526] text-[#faf8f2] hover:bg-[#822c20]'
-                  : 'bg-[#faf8f2] text-[#5c5341] hover:bg-[#eae3ce]'
-              }`}
-            >
-              <Hammer className="w-3.5 h-3.5" />
-            </button>
+          {isDev && (
+            <div className="flex items-center gap-1.5 border border-dashed border-[#9c3526]/40 px-1.5 py-0.5 bg-[#9c3526]/5 rounded-none mr-1">
+              <span className="text-[9px] font-mono font-bold text-[#9c3526] uppercase">DEV:</span>
+              {onTogglePlayground && (
+                <button
+                  onClick={onTogglePlayground}
+                  title={isPlaygroundActive ? "Exit Playground Mode" : "Enter Playground Mode"}
+                  className={`px-1.5 py-0.5 text-[9px] font-mono border border-[#3e382d] cursor-pointer transition uppercase font-bold ${
+                    isPlaygroundActive
+                      ? 'bg-[#9c3526] text-[#faf8f2] hover:bg-[#822c20]'
+                      : 'bg-[#faf8f2] text-[#5c5341] hover:bg-[#eae3ce]'
+                  }`}
+                >
+                  {isPlaygroundActive ? "Exit Playground" : "Playground"}
+                </button>
+              )}
+              {onResetProgress && (
+                <button
+                  onClick={onResetProgress}
+                  title="Reset all player progress, saved solutions, and achievements"
+                  className="px-1.5 py-0.5 text-[9px] font-mono bg-[#faf8f2] text-[#9c3526] hover:bg-[#9c3526] hover:text-[#faf8f2] border border-[#3e382d] cursor-pointer transition uppercase font-bold"
+                >
+                  Reset Progress
+                </button>
+              )}
+            </div>
           )}
 
           <button

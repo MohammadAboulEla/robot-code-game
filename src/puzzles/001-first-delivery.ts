@@ -5,8 +5,8 @@
 
 import type { PuzzleDefinition } from '../types/gameTypes';
 
-export const PUZZLE_001_FIRST_DELIVERY: PuzzleDefinition = {
-  id: '001-first-delivery',
+export const PUZZLE_004_FIRST_DELIVERY: PuzzleDefinition = {
+  id: '004-first-delivery',
   title: 'First Delivery',
   description:
     'Drive to the cargo box at (1, 3), rotate to face it, grab it, navigate around the obstacles at X=2, and drop the cargo container precisely on the target pad at (3, 1).',

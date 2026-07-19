@@ -19,7 +19,7 @@ const CURRENT_SCHEMA_VERSION = 2;
 function createDefaultSaveData(): SaveData {
   return {
     schemaVersion: CURRENT_SCHEMA_VERSION,
-    unlockedNodeIds: ['basics'],
+    unlockedNodeIds: ['print'],
     solvedPuzzleIds: [],
     solutions: {}
   };
@@ -67,6 +67,12 @@ export function loadSaveData(): SaveData {
         }
       }
       parsed.schemaVersion = 2;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+    }
+
+    // Ensure 'print' is unlocked in all saves since it's the new root
+    if (parsed.unlockedNodeIds && !parsed.unlockedNodeIds.includes('print')) {
+      parsed.unlockedNodeIds.push('print');
       localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
     }
 
@@ -178,5 +184,9 @@ export function getSavedSolutions(puzzleId: string): SavedSolution[] {
   const data = loadSaveData();
   if (!data.solutions) return [];
   return data.solutions[puzzleId] || [];
+}
+
+export function resetSaveData(): void {
+  localStorage.removeItem(STORAGE_KEY);
 }
 

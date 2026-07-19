@@ -5,8 +5,8 @@
 
 import type { PuzzleDefinition } from '../types/gameTypes';
 
-export const PUZZLE_002_AROUND_THE_BEND: PuzzleDefinition = {
-  id: '002-around-the-bend',
+export const PUZZLE_005_AROUND_THE_BEND: PuzzleDefinition = {
+  id: '005-around-the-bend',
   title: 'Around the Bend',
   description:
     'Navigate the robot around an L-shaped obstacle wall to reach the cargo box, then deliver it to the target pad on the other side.',

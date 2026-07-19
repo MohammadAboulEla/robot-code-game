@@ -14,6 +14,8 @@ export interface TreeNode {
   prerequisiteNodeIds: string[];
   /** Puzzle ID whose completion unlocks this node. Undefined for auto-unlocked nodes. */
   unlockedByPuzzleId?: string;
+  /** Short summary of what the robot taught at this node. */
+  recapText?: string;
 }
 
 /**
@@ -26,16 +28,68 @@ export interface TreeNode {
  */
 export const TREE_NODES: TreeNode[] = [
   {
+    id: 'print',
+    title: 'Console Print',
+    unlocksCommandIds: ['print'],
+    docMarkdown:
+      '## Console Print\n\n' +
+      'Use `print(message)` to print text messages to the Console Output Terminal.\n\n' +
+      'It allows basic operator-to-robot diagnostic communication.',
+    prerequisiteNodeIds: [],
+    // Always available on a fresh save
+    recapText: 'ESTABLISHED OPERATOR CHANNEL. SYSTEM DROID ONLINE AND MONITORING TRANSCRIPT LOGS.'
+  },
+  {
     id: 'basics',
     title: 'Basic Movement',
-    unlocksCommandIds: ['move', 'rotate', 'grab', 'drop'],
+    unlocksCommandIds: ['move'],
     docMarkdown:
       '## Basic Movement\n\n' +
-      'The four fundamental robot commands. `move()` drives one tile in a relative direction, ' +
-      '`rotate()` turns the robot 90°, `grab()` picks up adjacent cargo, and `drop()` releases it.\n\n' +
-      'Combined with `for` loops you can already write compact navigation sequences.',
-    prerequisiteNodeIds: [],
-    // No unlockedByPuzzleId — always available on a fresh save
+      'Allows you to instruct the robot to move 1 tile forward using `move()` without any parameters.',
+    prerequisiteNodeIds: ['print'],
+    unlockedByPuzzleId: '000-say-hello',
+    recapText: 'move() DRIVES THE UNIT FORWARD BY ONE GRID TILE ALONG ITS CURRENT HEADING.'
+  },
+  {
+    id: 'move-directions',
+    title: 'Directional Movement',
+    unlocksCommandIds: [],
+    docMarkdown:
+      '## Directional Movement\n\n' +
+      'Allows you to specify relative directions when calling `move(direction)`:\n\n' +
+      '- `move("front")` / `move()`\n' +
+      '- `move("left")`\n' +
+      '- `move("right")`\n' +
+      '- `move("back")`',
+    prerequisiteNodeIds: ['basics'],
+    unlockedByPuzzleId: '001-first-steps',
+    recapText: 'move("left"), move("right"), AND move("back") SIDE-STEP RELATIVE TO THE DRONE\'S HEADING.'
+  },
+  {
+    id: 'rotation',
+    title: 'Robot Rotation',
+    unlocksCommandIds: ['rotate'],
+    docMarkdown:
+      '## Robot Rotation\n\n' +
+      'Allows you to turn the robot in place 90 degrees using `rotate(direction)`:\n\n' +
+      '- `rotate("left")`\n' +
+      '- `rotate("right")`',
+    prerequisiteNodeIds: ['move-directions'],
+    unlockedByPuzzleId: '002-around-the-wall',
+    recapText: 'rotate("left") AND rotate("right") SPIN THE UNIT 90 DEGREES IN-PLACE.'
+  },
+  {
+    id: 'grab-drop',
+    title: 'Cargo Operations',
+    unlocksCommandIds: ['grab', 'drop'],
+    docMarkdown:
+      '## Cargo Operations\n\n' +
+      'Allows retrieval and loading of storage crates:\n\n' +
+      '- `grab()`: picks up cargo directly in front of the robot\n' +
+      '- `drop()`: releases cargo at the robot\'s current tile',
+    prerequisiteNodeIds: ['rotation'],
+    unlockedByPuzzleId: '003-pickup-and-delivery',
+    recapText: 'grab() SECURES THE ADJACENT CRATE IN FRONT. drop() RELEASES IT ON THE DRONE\'S CURRENT COORDINATE.'
   },
   {
     id: 'sensors',
@@ -46,8 +100,9 @@ export const TREE_NODES: TreeNode[] = [
       '`is_holding()` returns `True` when the robot is carrying cargo.\n\n' +
       '`can_move(direction)` probes whether a move in the given relative direction would succeed ' +
       '(no obstacle, no boundary). Use these in `if`/`while` conditions to write adaptive code.',
-    prerequisiteNodeIds: ['basics'],
-    unlockedByPuzzleId: '001-first-delivery',
+    prerequisiteNodeIds: ['grab-drop'],
+    unlockedByPuzzleId: '004-first-delivery',
+    recapText: 'is_holding() DETECTS CARGO. can_move(direction) SENSES BOUNDARIES AND WALLS BEFORE WE COLLIDE.'
   },
   {
     id: 'conditionals',
@@ -59,7 +114,8 @@ export const TREE_NODES: TreeNode[] = [
       'Branch your code based on sensor readings. Combine with `is_holding()` and `can_move()` ' +
       'to react to the world state instead of hardcoding every step.',
     prerequisiteNodeIds: ['sensors'],
-    unlockedByPuzzleId: '002-around-the-bend',
+    unlockedByPuzzleId: '005-around-the-bend',
+    recapText: 'if/else STRUCTURES ALLOW FOR REACTIVE SUB-ROUTINES BASED ON SENSOR FEEDBACK.'
   },
   // ── Future nodes (interpreter support needed) ─────────────────────────
   // {

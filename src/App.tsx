@@ -7,7 +7,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import type { PuzzleDefinition } from './types/gameTypes';
 import { PUZZLES } from './puzzles';
 import { buildCommandRegistry, ALL_COMMAND_IDS } from './game/commands/commands';
-import { getUnlockedCommandIds, getUnlockedNodeIds } from './state/saveData';
+import { getUnlockedCommandIds, getUnlockedNodeIds, resetSaveData } from './state/saveData';
 import { Header } from './components/Header';
 import { Ticker } from './components/Ticker';
 import { PuzzleSelect } from './components/PuzzleSelect';
@@ -28,9 +28,9 @@ export default function App() {
   const [playgroundPuzzle, setPlaygroundPuzzle] = useState<PuzzleDefinition | null>(null);
   const [playgroundReloadCounter, setPlaygroundReloadCounter] = useState(0);
 
-  // Detect ?dev=1 query parameter
+  // Detect dev mode (query parameter ?dev=1 or running in development mode)
   const isDevUrlParam = useMemo(() => {
-    return new URLSearchParams(window.location.search).get('dev') === '1';
+    return new URLSearchParams(window.location.search).get('dev') === '1' || import.meta.env.DEV;
   }, []);
 
   // Keyboard shortcut listener to toggle playground mode (Ctrl+Shift+D or Ctrl+Alt+P)
@@ -114,6 +114,13 @@ export default function App() {
     setPlaygroundReloadCounter(c => c + 1);
   }, []);
 
+  const handleResetProgress = useCallback(() => {
+    if (window.confirm("Are you sure you want to reset all progress, saved solutions, and achievements? This will refresh the page.")) {
+      resetSaveData();
+      window.location.reload();
+    }
+  }, []);
+
   return (
     <div id="game-container" className="h-screen w-screen flex flex-col overflow-hidden bg-[#dfd3b6] text-[#2e2a22] font-sans antialiased selection:bg-[#9c3526]/20 selection:text-[#2e2a22]">
       
@@ -125,6 +132,7 @@ export default function App() {
         isDev={isDevUrlParam}
         isPlaygroundActive={isPlaygroundMode}
         onTogglePlayground={handleTogglePlaygroundMode}
+        onResetProgress={handleResetProgress}
       />
 
       {/* Retro horizontal status ticker */}

@@ -169,6 +169,17 @@ export const ResearchTree: React.FC<ResearchTreeProps> = ({
                     </div>
                   )}
 
+                  {/* Lesson Recap (framed as robot voice) */}
+                  {unlocked && node.recapText && (
+                    <div className="mt-3 bg-[#eae3ce]/30 border border-[#2e2a22]/10 p-3 font-mono text-[10.5px] text-[#2e2a22]">
+                      <div className="text-[8px] font-bold text-[#9c3526] uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                        <div className="w-1 h-1 bg-[#9c3526] animate-pulse" style={{ borderRadius: '1px' }} />
+                        <span>R-07 Log Recap</span>
+                      </div>
+                      <p className="uppercase leading-normal font-bold">"{node.recapText}"</p>
+                    </div>
+                  )}
+
                   {/* Documentation */}
                   {unlocked ? (
                     <div className="mt-4 border-t border-[#eae3ce] pt-3.5">

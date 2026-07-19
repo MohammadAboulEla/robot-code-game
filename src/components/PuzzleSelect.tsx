@@ -62,7 +62,7 @@ export const PuzzleSelect: React.FC<PuzzleSelectProps> = ({
             className="inline-flex items-center gap-2 px-3.5 py-1.5 border border-[#3e382d] bg-[#f4efe1] hover:bg-[#faf8f2] hover:text-[#9c3526] text-xs font-bold font-mono uppercase tracking-wider transition-colors cursor-pointer"
           >
             <BookOpen className="w-4 h-4" />
-            Research Tree
+            Research
           </button>
 
           <button

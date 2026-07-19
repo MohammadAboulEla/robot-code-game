@@ -24,8 +24,8 @@ function puzzleToWorldState(puzzle: PuzzleDefinition): GameWorldState {
       holding: false,
       facing: puzzle.robotStart.facing
     },
-    box: { x: puzzle.cargo[0].x, y: puzzle.cargo[0].y },
-    target: { x: puzzle.targets[0].x, y: puzzle.targets[0].y },
+    box: puzzle.cargo && puzzle.cargo.length > 0 ? { x: puzzle.cargo[0].x, y: puzzle.cargo[0].y } : { x: -1, y: -1 },
+    target: puzzle.targets && puzzle.targets.length > 0 ? { x: puzzle.targets[0].x, y: puzzle.targets[0].y } : { x: -1, y: -1 },
     gridSize: { ...puzzle.gridSize },
     obstacles: puzzle.obstacles.map(o => ({ ...o }))
   };
@@ -171,11 +171,11 @@ export function useRobotSimulation(
     
     try {
       const ast = parsePython(code);
-      const executor = new PythonExecutor(initialWorld, commandRegistry);
+      const executor = new PythonExecutor(initialWorld, commandRegistry, puzzle.successCondition);
       const actions = executor.run(ast);
       
       if (actions.length === 0) {
-        throw new Error('No executable actions found. Make sure to call move(), grab(), or drop()!');
+        throw new Error('No executable actions found. Make sure to call a robot API function!');
       }
 
       setActionQueue(actions);
@@ -201,7 +201,7 @@ export function useRobotSimulation(
     if (actionQueue.length === 0) {
       try {
         const ast = parsePython(code);
-        const executor = new PythonExecutor(initialWorld, commandRegistry);
+        const executor = new PythonExecutor(initialWorld, commandRegistry, puzzle.successCondition);
         const actions = executor.run(ast);
         if (actions.length === 0) {
           throw new Error('No instructions generated.');
@@ -292,10 +292,12 @@ export function useRobotSimulation(
   };
 
   const loadBlankTemplate = () => {
+    const cargoStr = puzzle.cargo && puzzle.cargo.length > 0 ? `Cargo box is at (${puzzle.cargo[0].x}, ${puzzle.cargo[0].y})` : 'No cargo box';
+    const targetStr = puzzle.targets && puzzle.targets.length > 0 ? `Target pad is at (${puzzle.targets[0].x}, ${puzzle.targets[0].y})` : 'No target pad';
     setCode(`# Start from scratch!
 # Robot starts at (${puzzle.robotStart.x}, ${puzzle.robotStart.y})
-# Cargo box is at (${puzzle.cargo[0].x}, ${puzzle.cargo[0].y})
-# Target pad is at (${puzzle.targets[0].x}, ${puzzle.targets[0].y})
+# ${cargoStr}
+# ${targetStr}
 
 `);
     resetSimulationStateOnly();
