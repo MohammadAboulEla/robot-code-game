@@ -428,7 +428,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
 
         {/* Step Toast Overlay */}
         {isDebugMode && toastMsg && (
-          <div key={`toast-${currentIndex}`} className="absolute top-4 left-[68px] bg-[#2e2a22]/90 border border-[#eae3ce]/30 px-3 py-1.5 text-[#faf8f2] text-[10px] font-mono shadow-md animate-slide-in-right flex items-center gap-1.5 z-10">
+          <div key={`toast-${currentIndex}`} className="absolute top-3 left-[80px] bg-[#2e2a22]/90 border border-[#eae3ce]/30 px-3 py-1.5 text-[#faf8f2] text-[10px] font-mono shadow-md animate-slide-in-right flex items-center gap-1.5 z-10 max-w-[300px]">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
             <span>{toastMsg}</span>
           </div>
