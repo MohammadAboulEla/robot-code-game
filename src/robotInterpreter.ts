@@ -334,13 +334,13 @@ export class PythonExecutor {
   private maxInstructions = 1000;
   private instructionCount = 0;
   private commandRegistry: Map<string, CommandDefinition>;
-  private successCondition: 'cargo-delivery' | 'any-print';
+  private successCondition: 'cargo-delivery' | 'any-print' | 'robot-on-target';
   private hasPrinted = false;
 
   constructor(
     initialState: GameWorldState,
     commandRegistry: Map<string, CommandDefinition>,
-    successCondition: 'cargo-delivery' | 'any-print' = 'cargo-delivery'
+    successCondition: 'cargo-delivery' | 'any-print' | 'robot-on-target' = 'cargo-delivery'
   ) {
     this.state = cloneState(initialState);
     this.commandRegistry = commandRegistry;
