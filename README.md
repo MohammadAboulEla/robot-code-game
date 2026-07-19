@@ -1,6 +1,13 @@
 # Robot Code Game
 
+<video src="assets/output.mp4" width="100%" controls autoplay muted loop></video>
+
 Robot Code Game is a retro, vintage-terminal themed browser game designed to teach real Python programming by instructing a logistics robot drone (**Unit R-07**) to navigate isometric grids, retrieve cargo, and optimize execution metrics.
+
+<p align="center">
+  <img src="assets/UIExample.webp" width="49%" alt="UI Example" />
+  <img src="assets/TerminalExample.webp" width="49%" alt="Terminal Example" />
+</p>
 
 ## 🚀 Key Design Pillars
 
