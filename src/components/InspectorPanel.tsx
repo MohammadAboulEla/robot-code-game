@@ -12,8 +12,6 @@ import { IsometricVisualEngine } from './IsometricVisualEngine';
 import { ObjectiveCard } from './ObjectiveCard';
 import type { PuzzleDefinition, SavedSolution } from '../types/gameTypes';
 import type { GameWorldState, VMAction } from '../robotInterpreter';
-import { EXPRESSION_SPRITE_MAP, RobotExpression } from '../types/dialogueTypes';
-import spriteSheet from '../../assets/sprite.png';
 
 interface InspectorPanelProps {
   puzzle: PuzzleDefinition;
@@ -73,27 +71,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
     }
   }, [currentIndex]);
 
-  const getAmbientExpression = (): RobotExpression => {
-    if (isSuccess) return 'excited';
-    if (errorMessage) {
-      if (
-        errorMessage.includes('InfiniteLoopError') || 
-        errorMessage.includes('Collision') || 
-        errorMessage.includes('Boundary') || 
-        errorMessage.includes('crashed')
-      ) {
-        return 'confused';
-      }
-      return 'sad';
-    }
-    if (isPlaying) return 'talking';
-    return 'idle';
-  };
 
-  const currentExpression = getAmbientExpression();
-  const spriteCoords = EXPRESSION_SPRITE_MAP[currentExpression];
-  const bgPosX = spriteCoords.col * 50;
-  const bgPosY = spriteCoords.row * 50;
 
   return (
     <div className="bg-[#f4efe1]/90 border border-[#3e382d] shadow-sm overflow-hidden text-[11px] leading-relaxed text-[#5c5341] flex flex-col flex-1 min-h-0 h-full font-sans">
@@ -168,22 +146,6 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
           </button>
         </div>
 
-        {/* Compact Ambient Avatar */}
-        <div className="pr-3 flex items-center gap-1.5 shrink-0 border-l border-[#3e382d]/15 pl-3 h-[30px]">
-          <div
-            className="w-[20px] h-[20px] border border-[#3e382d] bg-white rounded-none select-none"
-            style={{
-              backgroundImage: `url(${spriteSheet})`,
-              backgroundSize: '300% 300%',
-              backgroundPosition: `${bgPosX}% ${bgPosY}%`,
-              imageRendering: 'auto',
-            }}
-            title={`R-07 Status: ${currentExpression.toUpperCase()}`}
-          />
-          <span className="text-[8px] font-mono font-bold text-[#9c3526] uppercase animate-pulse select-none">
-            {currentExpression}
-          </span>
-        </div>
       </div>
 
       {/* Tab Panels content, taking remaining height for visual engine */}
@@ -200,6 +162,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
             isDebugMode={isDebugMode}
             hideWrapper={true}
             onNextMission={onNextMission}
+            isPlaying={isPlaying}
           />
         )}
         

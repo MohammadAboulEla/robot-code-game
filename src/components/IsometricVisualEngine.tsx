@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Layers, CheckCircle2, XCircle } from 'lucide-react';
 import { GameWorldState, VMAction } from '../robotInterpreter';
 import { tileW, tileH, getIsoCoords, getTilePoints } from '../utils/isometricHelpers';
+import spriteSheet from '../../assets/sprite.png';
+import { EXPRESSION_SPRITE_MAP, RobotExpression } from '../types/dialogueTypes';
 
 interface IsometricVisualEngineProps {
   worldState: GameWorldState;
@@ -14,6 +16,7 @@ interface IsometricVisualEngineProps {
   isDebugMode?: boolean;
   hideWrapper?: boolean;
   onNextMission?: () => void;
+  isPlaying?: boolean;
 }
 
 function getActionToastMessage(action: VMAction): string {
@@ -51,7 +54,8 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
   currentIndex,
   isDebugMode = false,
   hideWrapper = false,
-  onNextMission
+  onNextMission,
+  isPlaying = false
 }) => {
   const [hoveredTile, setHoveredTile] = useState<{ x: number; y: number } | null>(null);
 
@@ -59,6 +63,28 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
     ? actionQueue[currentIndex] 
     : null;
   const toastMsg = currentAction ? getActionToastMessage(currentAction) : '';
+
+  const getAmbientExpression = (): RobotExpression => {
+    if (isSuccess) return 'excited';
+    if (errorMessage) {
+      if (
+        errorMessage.includes('InfiniteLoopError') || 
+        errorMessage.includes('Collision') || 
+        errorMessage.includes('Boundary') || 
+        errorMessage.includes('crashed')
+      ) {
+        return 'confused';
+      }
+      return 'sad';
+    }
+    if (isPlaying) return 'talking';
+    return 'idle';
+  };
+
+  const currentExpression = getAmbientExpression();
+  const spriteCoords = EXPRESSION_SPRITE_MAP[currentExpression];
+  const bgPosX = spriteCoords.col * 50;
+  const bgPosY = spriteCoords.row * 50;
 
   return (
     <div className={`relative flex flex-col overflow-hidden flex-1 min-h-0 h-full ${
@@ -88,9 +114,28 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
             {hoveredTile ? `TILE MAP: [${hoveredTile.x}, ${hoveredTile.y}]` : 'Hover grid for coordinates'}
           </div>
         )}
+
+        {/* Robot State Overlay */}
+        <div className="absolute top-3 left-3 flex flex-col items-center gap-1 z-10 w-[60px]">
+          <div className="bg-[#faf8f2]/95 border border-[#3e382d] p-1 shadow-sm select-none w-[60px] h-[60px] flex items-center justify-center">
+            <div
+              className="w-full h-full select-none"
+              style={{
+                backgroundImage: `url(${spriteSheet})`,
+                backgroundSize: '300% 300%',
+                backgroundPosition: `${bgPosX}% ${bgPosY}%`,
+                imageRendering: 'pixelated',
+              }}
+              title={`R-07 Status: ${currentExpression.toUpperCase()}`}
+            />
+          </div>
+          <span className="text-[9px] font-mono font-bold text-[#9c3526] uppercase animate-pulse select-none text-center leading-tight">
+            {currentExpression}
+          </span>
+        </div>
         
         <svg 
-          viewBox="0 0 500 320" 
+          viewBox="0 -30 500 350" 
           className="w-full h-full max-w-lg filter drop-shadow-[0_4px_8px_rgba(62,56,45,0.15)]"
         >
           <defs>
@@ -383,7 +428,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
 
         {/* Step Toast Overlay */}
         {isDebugMode && toastMsg && (
-          <div key={`toast-${currentIndex}`} className="absolute top-4 left-4 bg-[#2e2a22]/90 border border-[#eae3ce]/30 px-3 py-1.5 text-[#faf8f2] text-[10px] font-mono shadow-md animate-slide-in-right flex items-center gap-1.5 z-10">
+          <div key={`toast-${currentIndex}`} className="absolute top-4 left-[68px] bg-[#2e2a22]/90 border border-[#eae3ce]/30 px-3 py-1.5 text-[#faf8f2] text-[10px] font-mono shadow-md animate-slide-in-right flex items-center gap-1.5 z-10">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
             <span>{toastMsg}</span>
           </div>
