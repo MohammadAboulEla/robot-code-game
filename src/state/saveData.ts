@@ -76,6 +76,23 @@ export function loadSaveData(): SaveData {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
     }
 
+    // Sync unlocked nodes for solved puzzles in case the progression tree definitions were changed
+    if (parsed.solvedPuzzleIds && parsed.unlockedNodeIds) {
+      let updated = false;
+      for (const puzzleId of parsed.solvedPuzzleIds) {
+        const nodes = getNodesUnlockedByPuzzle(puzzleId);
+        for (const node of nodes) {
+          if (!parsed.unlockedNodeIds.includes(node.id)) {
+            parsed.unlockedNodeIds.push(node.id);
+            updated = true;
+          }
+        }
+      }
+      if (updated) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+      }
+    }
+
     return parsed as SaveData;
   } catch {
     return createDefaultSaveData();
