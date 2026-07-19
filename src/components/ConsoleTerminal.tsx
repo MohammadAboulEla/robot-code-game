@@ -39,7 +39,7 @@ export const ConsoleTerminal: React.FC<ConsoleTerminalProps> = ({
   return (
     <div className="bg-[#f4efe1] border border-[#3e382d] shadow-sm overflow-hidden flex flex-col h-full font-mono text-xs text-[#2e2a22]">
       {/* Header Tabs */}
-      <div className="border-b border-[#3e382d] bg-[#eae3ce] flex justify-between items-center shrink-0">
+      <div className={`bg-[#eae3ce] flex justify-between items-center shrink-0 ${isCollapsed ? '' : 'border-b border-[#3e382d]'}`}>
         <div className="flex">
           <button
             onClick={() => {
