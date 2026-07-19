@@ -118,7 +118,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
         )}
 
         {/* Robot State Overlay */}
-        <div className="absolute top-3 left-3 flex flex-col items-center gap-1 z-10 w-[60px]">
+        <div className="absolute top-3 left-3 flex flex-col z-10 w-[60px] shadow-sm">
           <div className="bg-[#faf8f2]/95 border border-[#3e382d] p-1 select-none w-[60px] h-[60px] flex items-center justify-center overflow-hidden">
             <div
               className="w-full h-full select-none"
@@ -132,9 +132,11 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
               title={`R-07 Status: ${currentExpression.toUpperCase()}`}
             />
           </div>
-          <span className="text-[9px] font-mono font-bold text-[#9c3526] uppercase animate-pulse select-none text-center leading-tight">
-            {currentExpression}
-          </span>
+          <div className="bg-[#9c3526] border-x border-b border-[#3e382d] py-1 select-none w-[60px] flex items-center justify-center text-center">
+            <span className="text-[8px] font-mono font-extrabold text-[#faf8f2] uppercase animate-pulse select-none leading-none tracking-wider">
+              {currentExpression}
+            </span>
+          </div>
         </div>
 
         <svg
@@ -431,7 +433,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
 
         {/* Step Toast Overlay */}
         {isDebugMode && toastMsg && (
-          <div key={`toast-${currentIndex}`} className="absolute top-3 left-[80px] bg-[#2e2a22]/90 border border-[#eae3ce]/30 px-3 py-1.5 text-[#faf8f2] text-[10px] font-mono shadow-md animate-slide-in-right flex items-center gap-1.5 z-10 max-w-[300px]">
+          <div key={`toast-${currentIndex}`} className="absolute top-3 left-[80px] bg-[#2e2a22]/90 border border-[#eae3ce]/30 px-3 py-1.5 text-[#faf8f2] text-[10px] font-mono shadow-md animate-slide-in-right flex items-center gap-1.5 z-10 max-w-[310px]">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
             <span>{toastMsg}</span>
           </div>
@@ -481,7 +483,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
         )}
 
         {errorMessage && (
-          <div className="absolute inset-x-4 bottom-4 bg-[#faf8f2] border-l-4 border-[#9c3526] p-4 shadow-md animate-slide-up z-20">
+          <div className="absolute inset-x-4 bottom-4 bg-[#EAE3CE]/60 border-l-4 border-[#9c3526] p-4 shadow-md animate-slide-up z-20">
             <div className="flex items-start gap-3">
               <div className="p-1 bg-[#9c3526]/10 text-[#9c3526] border border-[#9c3526]/20 mt-0.5">
                 <XCircle className="w-4 h-4" />
