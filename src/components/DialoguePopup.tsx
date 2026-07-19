@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { DialogueScript } from '../types/dialogueTypes';
 import { EXPRESSION_SPRITE_MAP } from '../types/dialogueTypes';
 import spriteSheet from '../../assets/sprite.png';
+import { tokenizePython } from '../utils/pythonTokenizer';
 
 interface DialoguePopupProps {
   script: DialogueScript;
@@ -14,19 +15,80 @@ interface DialoguePopupProps {
 }
 
 /**
- * Bottom-anchored game dialogue box with large robot portrait on the left,
- * name plate, message text, and NEXT / SKIP / CLOSE buttons.
+ * Formats the speaker name into the SPEKER [ROBOT UNIT ID: XXX] layout
+ */
+const formatSpeakerHeader = (speaker: string) => {
+  // e.g. "SYSTEM DROID UNIT-R07" -> "SYSTEM DROID [ROBOT UNIT ID: R-07]"
+  const match = speaker.match(/^(SYSTEM DROID)\s+(UNIT-R\d+)$/i);
+  if (match) {
+    return `${match[1]} [ROBOT UNIT ID: ${match[2].replace('UNIT-', '')}]`;
+  }
+  return speaker;
+};
+
+/**
+ * Parser that tokenizes dialogue text and highlights python functions and keywords.
+ */
+const renderDialogueText = (text: string) => {
+  // Regex to extract Python function calls and highlighted words
+  const regex = /(\b(?:move|rotate|grab|drop|is_holding|can_move|range|print)\s*\([^)]*\))|(\b(?:PROGRAMMER|OPERATOR|PYTHON|CARGO(?:\s+BOX)?|ROBOT|A-1|UNIT\s+R-07|SYSTEM\s+DROID|SCRIPT|COMMANDS?|PROTOCOL|DELIVERY)\b)/gi;
+
+  const parts = text.split(regex);
+
+  return parts.map((part, index) => {
+    if (!part) return null;
+
+    const isFunctionCall = /^(?:move|rotate|grab|drop|is_holding|can_move|range|print)\s*\(/i.test(part);
+    if (isFunctionCall) {
+      const tokens = tokenizePython(part);
+      return (
+        <span key={index} className="font-extrabold font-mono inline-block">
+          {tokens.map((token, i) => {
+            let colorClass = "text-[#2e2a22]";
+            if (token.type === 'comment') {
+              colorClass = "text-[#8a7c62] italic";
+            } else if (token.type === 'string') {
+              colorClass = "text-[#4d7c0f] font-semibold";
+            } else if (token.type === 'number') {
+              colorClass = "text-[#b8005b]";
+            } else if (token.type === 'keyword') {
+              colorClass = "text-[#9c3526] font-bold";
+            } else if (token.type === 'function') {
+              colorClass = "text-[#1a6596] font-bold";
+            } else if (token.type === 'punctuation') {
+              colorClass = "text-[#5c5341]";
+            }
+            return (
+              <span key={i} className={colorClass}>
+                {token.text}
+              </span>
+            );
+          })}
+        </span>
+      );
+    }
+
+    const isTerm = /^(?:PROGRAMMER|OPERATOR|PYTHON|CARGO(?:\s+BOX)?|ROBOT|A-1|UNIT\s+R-07|SYSTEM\s+DROID|SCRIPT|COMMANDS?|PROTOCOL|DELIVERY)$/i.test(part);
+    if (isTerm) {
+      return (
+        <span key={index} className="text-[#1a6596] font-extrabold">
+          {part}
+        </span>
+      );
+    }
+
+    return <span key={index}>{part}</span>;
+  });
+};
+
+/**
+ * Skeuomorphic retro-futuristic dialogue popup mimicking the provided design references.
  */
 export const DialoguePopup: React.FC<DialoguePopupProps> = ({ script, onComplete }) => {
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
 
   const line = script.lines[currentLineIndex];
-  if (!line) return null;
-
-  const spriteCoords = EXPRESSION_SPRITE_MAP[line.expression];
-  const bgPosX = spriteCoords.col * 50;
-  const bgPosY = spriteCoords.row * 50;
-
+  
   const isLastLine = currentLineIndex >= script.lines.length - 1;
 
   const handleNext = () => {
@@ -35,104 +97,112 @@ export const DialoguePopup: React.FC<DialoguePopupProps> = ({ script, onComplete
     }
   };
 
-  const handleSkip = () => {
-    // Jump to last line
-    setCurrentLineIndex(script.lines.length - 1);
+  // Keyboard navigation listener (Enter/Space)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (isLastLine) {
+          onComplete();
+        } else {
+          handleNext();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLastLine, onComplete]);
+
+  if (!line) return null;
+
+  const spriteCoords = EXPRESSION_SPRITE_MAP[line.expression];
+  const bgPosX = spriteCoords.col * 50;
+  const bgPosY = spriteCoords.row * 50;
+
+  const handleAdvance = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isLastLine) {
+      onComplete();
+    } else {
+      handleNext();
+    }
   };
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex flex-col justify-end items-center pb-6 bg-black/45 animate-fade-in"
+      className="fixed inset-0 z-[100] flex justify-center items-center bg-black/55 backdrop-blur-[1px] animate-fade-in"
       style={{ pointerEvents: 'auto' }}
     >
-      {/* Wrapper: relative so portrait can overlap the left edge */}
-      <div className="relative" style={{ width: '680px' }}>
+      {/* Outer Metallic Bezel Frame */}
+      <div 
+        onClick={handleAdvance}
+        className="relative w-[820px] min-h-[340px] flex flex-col bg-gradient-to-br from-[#c8c0ae] via-[#a89e8b] to-[#7c7260] border-4 border-[#3e382d] rounded-[28px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.6),inset_0_2px_2px_rgba(255,255,255,0.45),inset_0_-2px_2px_rgba(0,0,0,0.45)] select-none cursor-pointer"
+      >
+        {/* Top Handle / Bracket */}
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-[340px] h-3.5 bg-gradient-to-r from-[#8e8470] via-[#bfb6a2] to-[#746b57] border-2 border-[#3e382d] rounded-t-full shadow-sm z-0">
+          <div className="absolute -left-3 -top-0.5 w-3 h-4 bg-[#6e6553] border-2 border-[#3e382d] rounded-sm"></div>
+          <div className="absolute -right-3 -top-0.5 w-3 h-4 bg-[#6e6553] border-2 border-[#3e382d] rounded-sm"></div>
+        </div>
 
-          {/* Robot portrait — absolutely positioned, overlapping left edge */}
-          <div
-            className="absolute z-10"
-            style={{
-              width: '350px',
-              height: '350px',
-              left: '-150px',
-              bottom: '-50px',
-              backgroundImage: `url(${spriteSheet})`,
-              backgroundSize: '300% 300%',
-              backgroundPosition: `${bgPosX}% ${bgPosY}%`,
-              imageRendering: 'auto',
-              filter: 'drop-shadow(0 6px 16px rgba(0,0,0,0.45))',
-            }}
-          />
+        {/* Decorative Corner Rivets */}
+        <div className="absolute left-4 top-4 w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#5c5341] to-[#ded9c6] border border-[#2e2a22] shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"></div>
+        <div className="absolute right-4 top-4 w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#5c5341] to-[#ded9c6] border border-[#2e2a22] shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"></div>
+        <div className="absolute left-4 bottom-4 w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#5c5341] to-[#ded9c6] border border-[#2e2a22] shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"></div>
+        <div className="absolute right-4 bottom-4 w-3.5 h-3.5 rounded-full bg-gradient-to-tr from-[#5c5341] to-[#ded9c6] border border-[#2e2a22] shadow-[inset_0_1px_1px_rgba(0,0,0,0.6)]"></div>
 
-          {/* Name plate tab — centered above the box */}
-          <div className="flex justify-center mb-[-2px] relative z-0">
+        {/* Inner Recessed Panel Container */}
+        <div className="m-3.5 p-4 bg-[#b5ad98] border-2 border-[#3e382d] rounded-[18px] shadow-[inset_0_4px_10px_rgba(0,0,0,0.3)] flex-1 flex gap-5 items-stretch min-h-0">
+          
+          {/* Left Column: Robot Portrait Viewport */}
+          <div className="w-[240px] relative flex-shrink-0 flex items-center justify-center bg-[#ded9c6]/45 border border-[#3e382d]/30 rounded-xl overflow-hidden shadow-[inset_0_2px_4px_rgba(0,0,0,0.15)]">
             <div
-              className="px-6 py-1.5"
               style={{
-                backgroundColor: '#3e382d',
-                borderRadius: '6px 6px 0 0',
-                borderTop: '2px solid #2e2a22',
-                borderLeft: '2px solid #2e2a22',
-                borderRight: '2px solid #2e2a22',
+                width: '260px',
+                height: '260px',
+                backgroundImage: `url(${spriteSheet})`,
+                backgroundSize: '300% 300%',
+                backgroundPosition: `${bgPosX}% ${bgPosY}%`,
+                imageRendering: 'auto',
+                filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.25))',
               }}
-            >
-              <span className="text-[11px] font-mono font-bold tracking-[0.15em] text-[#faf8f2] uppercase">
-                {line.speaker}
+              className="absolute bottom-1"
+            />
+          </div>
+
+          {/* Right Column: Dialogue Terminal Screen Box */}
+          <div className="flex-1 flex flex-col bg-[#eae5d3] border-2 border-[#3e382d] rounded-xl overflow-hidden shadow-[0_4px_12px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.4)]">
+            {/* Screen Header Bar */}
+            <div className="bg-[#72908a] border-b-2 border-[#3e382d] py-2 px-4 flex items-center justify-between">
+              <span className="font-mono text-xs font-bold text-[#2e2a22] tracking-wider uppercase">
+                {formatSpeakerHeader(line.speaker)}
               </span>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-700 animate-pulse"></span>
+                <span className="text-[9px] font-mono font-extrabold text-[#2e2a22]/70 uppercase tracking-widest">ONLINE</span>
+              </div>
             </div>
-          </div>
 
-          {/* Dialogue box — fixed dimensions */}
-          <div
-            className="animate-bubble"
-            style={{
-              width: '680px',
-              height: '180px',
-              backgroundColor: '#f4efe1',
-              border: '2px solid #2e2a22',
-              borderRadius: '8px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.5)',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            {/* Text content — left padding clears the portrait */}
-            <div className="flex-1 overflow-y-auto" style={{ paddingLeft: '130px', paddingRight: '20px', paddingTop: '16px', paddingBottom: '8px' }}>
-              <p className="text-[13px] text-[#2e2a22] leading-[1.7] font-mono font-bold uppercase"
-                style={{ letterSpacing: '0.03em' }}
-              >
-                {line.text}
+            {/* Screen Content Area */}
+            <div className="flex-1 p-5 flex flex-col justify-between">
+              <p className="text-[13.5px] text-[#2e2a22] leading-relaxed font-mono font-bold select-text">
+                {renderDialogueText(line.text)}
+                <span className="inline-block w-2.5 h-4 bg-[#2e2a22] animate-pulse ml-1.5 align-middle"></span>
               </p>
-            </div>
 
-            {/* Button row */}
-            <div className="flex justify-end gap-2 px-5 pb-4 shrink-0">
-              {!isLastLine && (
-                <button onClick={handleNext} className="dialogue-btn">
-                  Next
-                </button>
-              )}
-              {/* Temporarily disabled Skip button:
-              {!isLastLine && (
-                <button onClick={handleSkip} className="dialogue-btn">
-                  Skip
-                </button>
-              )}
-              */}
-              {/* Close button only appears on the last line to prevent premature closing */}
-              {isLastLine && (
-                <button onClick={onComplete} className="dialogue-btn">
-                  Close
-                </button>
-              )}
-              {/* Original Close button (always visible):
-              <button onClick={onComplete} className="dialogue-btn">
-                Close
-              </button>
-              */}
+              {/* Progress Indicator Block */}
+              <div className="mt-4 shrink-0">
+                <div className="w-fit mx-auto border border-[#3e382d]/30 bg-[#ded9c6]/85 hover:bg-[#d2cbae] transition-colors duration-150 py-1.5 px-6 rounded-md shadow-sm text-center">
+                  <span className="font-mono text-[10px] font-bold text-[#4a4235] tracking-widest uppercase">
+                    [ {isLastLine ? 'PRESS ENTER TO CLOSE' : 'PRESS ENTER TO CONTINUE'} ]
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
+    </div>
   );
 };
+
