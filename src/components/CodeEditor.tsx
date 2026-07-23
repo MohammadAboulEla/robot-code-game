@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo, useCallback } from 'react';
 import { Code } from 'lucide-react';
 import { tokenizePython } from '../utils/pythonTokenizer';
 
@@ -23,7 +23,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const highlightBgRef = useRef<HTMLDivElement>(null);
   const codeHighlightRef = useRef<HTMLPreElement>(null);
 
-  const handleEditorScroll = () => {
+  const handleEditorScroll = useCallback(() => {
     if (textareaRef.current) {
       const scrollTop = textareaRef.current.scrollTop;
       const scrollLeft = textareaRef.current.scrollLeft;
@@ -38,13 +38,25 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         codeHighlightRef.current.scrollLeft = scrollLeft;
       }
     }
-  };
+  }, []);
 
   useEffect(() => {
     handleEditorScroll();
-  }, [code]);
+  }, [code, handleEditorScroll]);
 
-  const codeLines = code.split('\n');
+  // Re-sync overlay layers when the editor is resized (e.g. terminal collapse,
+  // window resize). The textarea re-clamps its scroll but fires no scroll event,
+  // which otherwise leaves the syntax/gutter layers misaligned.
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => handleEditorScroll());
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [handleEditorScroll]);
+
+  const codeLines = useMemo(() => code.split('\n'), [code]);
+  const tokens = useMemo(() => tokenizePython(code), [code]);
 
   return (
     <div className="bg-[#faf8f2] border border-[#3e382d] shadow-sm flex flex-col flex-1 min-h-0 h-full">
@@ -128,7 +140,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             }}
           >
             <code>
-              {tokenizePython(code).map((token, i) => {
+              {tokens.map((token, i) => {
                 let className = "text-[#2e2a22]"; // default charcoal
                 if (token.type === 'comment') {
                   className = "text-[#8a7c62] italic";
