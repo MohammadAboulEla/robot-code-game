@@ -48,11 +48,20 @@ export function useDialogue() {
     }
   }, [sendDialogue]);
 
+  /** Replays a puzzle's load dialogue on demand, bypassing session dedup. */
+  const replayPuzzleLoad = useCallback((puzzleId: string) => {
+    const match = DIALOGUE_TRIGGERS.find(
+      t => t.trigger === 'puzzleLoad' && t.puzzleId === puzzleId
+    );
+    if (match) sendDialogue(match.scriptId);
+  }, [sendDialogue]);
+
   return {
     activeScript,
     setActiveScript,
     sendDialogue,
     dismissDialogue,
     fireDialogueTrigger,
+    replayPuzzleLoad,
   };
 }

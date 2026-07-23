@@ -21,6 +21,7 @@ interface IsometricVisualEngineProps {
   isPlaying?: boolean;
   puzzleId?: string;
   onReceiveCall?: () => void;
+  onReplayIntro?: () => void;
   onTileClick?: (x: number, y: number) => void;
 }
 
@@ -63,7 +64,8 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
   onNextMission,
   isPlaying = false,
   puzzleId,
-  onReceiveCall
+  onReceiveCall,
+  onReplayIntro
 }) => {
   const [hoveredTile, setHoveredTile] = useState<{ x: number; y: number } | null>(null);
 
@@ -123,9 +125,15 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
 
         {/* Robot State Overlay */}
         <div className="absolute top-3 left-3 flex flex-col z-10 w-[60px] shadow-sm">
-          <div className="bg-[#faf8f2]/95 border border-[#3e382d] p-1 select-none w-[60px] h-[60px] flex items-center justify-center overflow-hidden">
+          <button
+            type="button"
+            onClick={onReplayIntro}
+            disabled={!onReplayIntro}
+            title={onReplayIntro ? 'Replay mission briefing' : `R-07 Status: ${currentExpression.toUpperCase()}`}
+            className={`bg-[#faf8f2]/95 border border-[#3e382d] p-1 select-none w-[60px] h-[60px] flex items-center justify-center overflow-hidden ${onReplayIntro ? 'cursor-pointer hover:border-[#9c3526]' : ''}`}
+          >
             <div
-              className="w-full h-full select-none"
+              className="w-full h-full select-none pointer-events-none"
               style={{
                 backgroundImage: `url(${spriteSheet})`,
                 backgroundSize: '300% 300%',
@@ -133,9 +141,8 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
                 imageRendering: 'pixelated',
                 transform: 'scale(1.45)',
               }}
-              title={`R-07 Status: ${currentExpression.toUpperCase()}`}
             />
-          </div>
+          </button>
           <div className="bg-[#9c3526] border-x border-b border-[#3e382d] py-1 select-none w-[60px] flex items-center justify-center text-center">
             <span className="text-[8px] font-mono font-extrabold text-[#faf8f2] uppercase animate-pulse select-none leading-none tracking-wider">
               {currentExpression}

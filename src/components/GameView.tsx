@@ -30,6 +30,7 @@ interface GameViewProps {
   };
   onNextMission?: () => void;
   onReceiveCall?: () => void;
+  onReplayIntro?: () => void;
 }
 
 export const GameView: React.FC<GameViewProps> = ({
@@ -41,7 +42,8 @@ export const GameView: React.FC<GameViewProps> = ({
   isPlaygroundMode = false,
   playgroundProps,
   onNextMission,
-  onReceiveCall
+  onReceiveCall,
+  onReplayIntro
 }) => {
   const {
     code,
@@ -147,6 +149,7 @@ export const GameView: React.FC<GameViewProps> = ({
               isDebugMode={isDebugMode}
               onNextMission={onNextMission}
               onReceiveCall={onReceiveCall}
+              onReplayIntro={onReplayIntro}
             />
           </div>
         </div>
@@ -209,6 +212,7 @@ export const GameView: React.FC<GameViewProps> = ({
               isDebugMode={isDebugMode}
               onNextMission={onNextMission}
               onReceiveCall={onReceiveCall}
+              onReplayIntro={onReplayIntro}
             />
           </div>
         </div>

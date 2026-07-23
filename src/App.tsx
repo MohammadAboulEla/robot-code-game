@@ -23,7 +23,7 @@ export default function App() {
   const [solvedCounter, setSolvedCounter] = useState(0);
 
   // Dialogue engine
-  const { activeScript, setActiveScript, dismissDialogue, fireDialogueTrigger } = useDialogue();
+  const { activeScript, setActiveScript, dismissDialogue, fireDialogueTrigger, replayPuzzleLoad } = useDialogue();
 
   // Playground Mode states
   const [isPlaygroundMode, setIsPlaygroundMode] = useState(false);
@@ -148,6 +148,10 @@ export default function App() {
     fireDialogueTrigger('puzzleSolved', { puzzleId: '000-say-hello' });
   }, [fireDialogueTrigger]);
 
+  const handleReplayIntro = useCallback(() => {
+    if (activePuzzle) replayPuzzleLoad(activePuzzle.id);
+  }, [activePuzzle, replayPuzzleLoad]);
+
   // Fire puzzleLoad dialogue trigger when a puzzle is selected
   useEffect(() => {
     if (selectedPuzzle && !isPlaygroundMode) {
@@ -203,6 +207,7 @@ export default function App() {
             isPlaygroundMode={isPlaygroundMode}
             onNextMission={nextPuzzle ? handleNextMission : undefined}
             onReceiveCall={handleReceiveCall}
+            onReplayIntro={handleReplayIntro}
             // Playground specific props
             playgroundProps={
               isPlaygroundMode && playgroundPuzzle ? {

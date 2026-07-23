@@ -33,6 +33,7 @@ interface InspectorPanelProps {
   currentIndex?: number;
   onNextMission?: () => void;
   onReceiveCall?: () => void;
+  onReplayIntro?: () => void;
 }
 
 type TabType = 'visual' | 'objective' | 'manual' | 'commands' | 'compass' | 'archive';
@@ -56,7 +57,8 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
   currentIndex,
   isDebugMode = false,
   onNextMission,
-  onReceiveCall
+  onReceiveCall,
+  onReplayIntro
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('visual');
 
@@ -169,6 +171,7 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
                 isPlaying={isPlaying}
                 puzzleId={puzzle.id}
                 onReceiveCall={onReceiveCall}
+                onReplayIntro={onReplayIntro}
               />
             </div>
           </div>
