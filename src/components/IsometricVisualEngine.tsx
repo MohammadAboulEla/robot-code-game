@@ -265,7 +265,7 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
           </g>
 
           {/* 3. Static or Unheld Box (Cargo Container) */}
-          {!worldState.robot.holding && (
+          {!worldState.robot.holding && worldState.box.x >= 0 && worldState.box.y >= 0 && (
             <g id="cargo-box" pointerEvents="none">
               {(() => {
                 const { x: sx, y: sy } = getIsoCoords(worldState.box.x, worldState.box.y);

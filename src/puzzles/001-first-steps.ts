@@ -10,7 +10,7 @@ export const PUZZLE_001_FIRST_STEPS: PuzzleDefinition = {
   title: 'First Steps',
   description:
     'Instruct the robot to move forward 3 times to reach the target pad at (0, 3).',
-  gridSize: { width: 4, height: 4 },
+  gridSize: { width: 1, height: 4 },
   obstacles: [],
   robotStart: { x: 0, y: 0, facing: 'down' },
   cargo: [],
