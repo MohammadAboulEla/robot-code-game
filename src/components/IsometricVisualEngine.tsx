@@ -4,9 +4,11 @@ import { GameWorldState, VMAction } from '../robotInterpreter';
 import { tileW, tileH, getIsoCoords, getTilePoints } from '../utils/isometricHelpers';
 import spriteSheet from '../../assets/sprite.webp';
 import { EXPRESSION_SPRITE_MAP, RobotExpression } from '../types/dialogueTypes';
+import { RobotVitals } from './RobotVitals';
 
 interface IsometricVisualEngineProps {
   worldState: GameWorldState;
+  sensorData?: { unitId: string; energy: number; temperature: number };
   isSuccess: boolean;
   errorMessage: string | null;
   setErrorMessage: (msg: string | null) => void;
@@ -49,6 +51,7 @@ function getActionToastMessage(action: VMAction): string {
 
 export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
   worldState,
+  sensorData,
   isSuccess,
   errorMessage,
   setErrorMessage,
@@ -138,6 +141,9 @@ export const IsometricVisualEngine: React.FC<IsometricVisualEngineProps> = ({
               {currentExpression}
             </span>
           </div>
+          {sensorData && (
+            <RobotVitals energy={sensorData.energy} temperature={sensorData.temperature} />
+          )}
         </div>
 
         <svg

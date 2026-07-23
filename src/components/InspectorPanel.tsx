@@ -10,7 +10,6 @@ import { OrientationCompass } from './OrientationCompass';
 import { SolutionsPanel } from './SolutionsPanel';
 import { IsometricVisualEngine } from './IsometricVisualEngine';
 import { ObjectiveCard } from './ObjectiveCard';
-import { SensorReadout } from './SensorReadout';
 import type { PuzzleDefinition, SavedSolution } from '../types/gameTypes';
 import type { GameWorldState, VMAction } from '../robotInterpreter';
 
@@ -154,14 +153,10 @@ export const InspectorPanel: React.FC<InspectorPanelProps> = ({
       <div className="flex-grow flex-1 min-h-0 bg-[#faf8f2] flex flex-col overflow-hidden">
         {activeTab === 'visual' && (
           <div className="flex-grow flex-1 min-h-0 flex flex-col">
-            {puzzle.sensorData && (
-              <div className="p-3.5 bg-[#eae3ce] border-b border-[#3e382d] shrink-0">
-                <SensorReadout data={puzzle.sensorData} />
-              </div>
-            )}
             <div className="flex-grow flex-1 min-h-0 relative">
-              <IsometricVisualEngine 
+              <IsometricVisualEngine
                 worldState={worldState}
+                sensorData={puzzle.sensorData}
                 isSuccess={isSuccess}
                 errorMessage={errorMessage}
                 setErrorMessage={setErrorMessage}
