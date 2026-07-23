@@ -36,6 +36,9 @@ export default function App() {
   // Test Mode states
   const [isTestModeActive, setIsTestModeActive] = useState(false);
 
+  // Dev: unlock all levels regardless of progress
+  const [devUnlockAll, setDevUnlockAll] = useState(false);
+
   // Detect dev mode (query parameter ?dev=1 or running in development mode)
   const isDevUrlParam = useMemo(() => {
     return new URLSearchParams(window.location.search).get('dev') === '1' || import.meta.env.DEV;
@@ -188,6 +191,8 @@ export default function App() {
         onResetProgress={handleResetProgress}
         isTestModeActive={isTestModeActive}
         onToggleTestMode={handleToggleTestMode}
+        devUnlockAll={devUnlockAll}
+        onToggleUnlockAll={isDevUrlParam ? () => setDevUnlockAll(v => !v) : undefined}
       />
 
       {/* Retro horizontal status ticker */}
@@ -227,6 +232,7 @@ export default function App() {
             unlockedNodeIds={unlockedNodeIds}
             unlockedCommandIds={unlockedCommandIds}
             onSelectPuzzle={setSelectedPuzzle}
+            devUnlockAll={devUnlockAll}
           />
         </div>
       )}

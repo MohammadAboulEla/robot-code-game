@@ -18,6 +18,8 @@ interface HeaderProps {
   onResetProgress?: () => void;
   isTestModeActive?: boolean;
   onToggleTestMode?: () => void;
+  devUnlockAll?: boolean;
+  onToggleUnlockAll?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -29,7 +31,9 @@ export const Header: React.FC<HeaderProps> = ({
   onTogglePlayground,
   onResetProgress,
   isTestModeActive,
-  onToggleTestMode
+  onToggleTestMode,
+  devUnlockAll,
+  onToggleUnlockAll
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -109,6 +113,19 @@ export const Header: React.FC<HeaderProps> = ({
                   }`}
                 >
                   {isTestModeActive ? "Exit Test Mode" : "Test Mode"}
+                </button>
+              )}
+              {onToggleUnlockAll && (
+                <button
+                  onClick={onToggleUnlockAll}
+                  title="Unlock all levels regardless of progress"
+                  className={`px-1.5 py-0.5 text-[9px] font-mono border border-[#3e382d] cursor-pointer transition uppercase font-bold ${
+                    devUnlockAll
+                      ? 'bg-[#9c3526] text-[#faf8f2] hover:bg-[#822c20]'
+                      : 'bg-[#faf8f2] text-[#5c5341] hover:bg-[#eae3ce]'
+                  }`}
+                >
+                  Unlock All
                 </button>
               )}
               {onResetProgress && (

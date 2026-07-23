@@ -10,13 +10,15 @@ interface PuzzleSelectProps {
   unlockedNodeIds: string[];
   unlockedCommandIds: string[];
   onSelectPuzzle: (puzzle: PuzzleDefinition) => void;
+  devUnlockAll?: boolean;
 }
 
 export const PuzzleSelect: React.FC<PuzzleSelectProps> = ({
   puzzles,
   unlockedNodeIds,
   unlockedCommandIds,
-  onSelectPuzzle
+  onSelectPuzzle,
+  devUnlockAll = false
 }) => {
   const [showTree, setShowTree] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
@@ -79,7 +81,7 @@ export const PuzzleSelect: React.FC<PuzzleSelectProps> = ({
       <div className="space-y-3">
         {puzzles.map((puzzle, index) => {
           const solved = isPuzzleSolved(puzzle.id);
-          const unlocked = index === 0 || isPuzzleSolved(puzzles[index - 1].id);
+          const unlocked = devUnlockAll || index === 0 || isPuzzleSolved(puzzles[index - 1].id);
 
           return (
             <button
